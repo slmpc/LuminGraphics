@@ -166,3 +166,10 @@ tasks.register("verifyPrismArtifact") {
 tasks.named("check") {
     dependsOn("verifyTopology")
 }
+
+for (smoke in listOf("gl41Smoke", "glDsaSmoke", "vulkanSmoke", "wrongContextSmoke", "missingShaderSmoke")) {
+    tasks.register(smoke) {
+        group = "verification"
+        dependsOn(":lumin-graphics-demo:$smoke")
+    }
+}

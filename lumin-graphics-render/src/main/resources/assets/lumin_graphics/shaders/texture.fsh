@@ -1,10 +1,11 @@
 #version 410 core
+#extension GL_ARB_shading_language_420pack : require
 
 #ifdef LUMIN_VULKAN
 #define LUMIN_BINDING(index) layout(set = 0, binding = index)
 #define LUMIN_VERTEX_ID gl_VertexIndex
 #else
-#define LUMIN_BINDING(index)
+#define LUMIN_BINDING(index) layout(binding = index)
 #define LUMIN_VERTEX_ID gl_VertexID
 #endif
 
@@ -16,7 +17,7 @@ layout(location = 4) in vec4 f_Radius;
 
 layout(location = 0) out vec4 fragColor;
 
-LUMIN_BINDING(0) uniform sampler2D Sampler0;
+LUMIN_BINDING(1) uniform sampler2D Sampler0;
 
 float aastep(float x) {
     float afwidth = fwidth(x);

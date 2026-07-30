@@ -116,6 +116,11 @@ class ShaderArtifactTest {
         assertFailure(() -> validateSource("rectangle.vsh", collidingDrawBlock, true), "colliding LuminDraw block");
 
         String texture = Files.readString(RESOURCES.resolve("assets/lumin_graphics/shaders/texture.fsh"));
+        assertTrue(texture.contains("LUMIN_BINDING(1) uniform sampler2D Sampler0"));
+        assertTrue(Files.readString(RESOURCES.resolve("assets/lumin_graphics/shaders/ttf_font_aa.fsh"))
+                .contains("LUMIN_BINDING(1) uniform sampler2D Sampler0"));
+        assertTrue(Files.readString(RESOURCES.resolve("assets/lumin_graphics/shaders/ttf_font_no_aa.fsh"))
+                .contains("LUMIN_BINDING(1) uniform sampler2D Sampler0"));
         assertFailure(() -> validateSampler(texture.replace("Sampler0", "BrokenSampler"), "Sampler0"), "sampler missing");
     }
 
