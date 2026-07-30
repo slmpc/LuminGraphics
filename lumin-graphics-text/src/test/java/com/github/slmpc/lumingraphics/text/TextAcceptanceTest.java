@@ -53,11 +53,15 @@ class TextAcceptanceTest {
     void rendererSubmitsStableAtlasOrderedBatchesAndRejectsClosedUse() {
         TraceUploader uploader = new TraceUploader();
         List<TextRenderBatch> submitted = new java.util.ArrayList<>();
+        AtomicInteger submittedGlyphs = new AtomicInteger();
         try (TtfFontLoader font = new TtfFontLoader(FONT, 48, 4, 96, 96, 4, uploader, Runnable::run);
-             TtfTextRenderer renderer = new TtfTextRenderer(submitted::addAll)) {
+             TtfTextRenderer renderer = new TtfTextRenderer(draws -> draws.forEach(draw -> {
+                 submitted.addAll(draw.batches());
+                 submittedGlyphs.addAndGet(draw.glyphCount());
+             }))) {
             TextLayout first = renderer.add("ABC", 0, 0, 1, font);
             renderer.draw();
-            assertEquals(first.glyphCount(), submitted.stream().mapToInt(TextRenderBatch::glyphCount).sum());
+            assertEquals(first.glyphCount(), submittedGlyphs.get());
             assertEquals(first.batches(), submitted);
             renderer.clear();
         }

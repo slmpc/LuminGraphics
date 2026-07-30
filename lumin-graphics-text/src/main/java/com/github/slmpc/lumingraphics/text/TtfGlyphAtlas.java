@@ -106,6 +106,10 @@ public final class TtfGlyphAtlas implements AutoCloseable {
 
         private UploadLease(UploadSlot slot) { this.slot = slot; }
         GlyphAtlasUpload upload() { return slot.value(); }
+        UploadLease retain() {
+            if (closed.get()) throw new FontClosedException("Glyph atlas upload lease is closed");
+            return slot.retain();
+        }
         @Override public void close() { if (closed.compareAndSet(false, true)) slot.release(); }
     }
 

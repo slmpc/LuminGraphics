@@ -224,14 +224,18 @@ class TextPipelineTest {
         try (TtfFontLoader loader = new TtfFontLoader(FONT, 48, 4, 96, 96, 4, uploader, Runnable::run);
              TtfTextRenderer renderer = new TtfTextRenderer(ignored -> { throw new IllegalStateException("sink failed"); })) {
             TextRenderBatch failed = renderer.add("A", 0, 0, 1, loader).batches().get(0);
+            GlyphAtlasUpload failedUpload = failed.upload();
             loader.requireGlyph('B');
             assertThrows(IllegalStateException.class, renderer::draw);
-            assertTrue(failed.upload().isClosed(), "draw failure must release pending batches");
+            assertTrue(failed.isClosed(), "draw failure must invalidate the borrowed batch");
+            assertTrue(failedUpload.isClosed(), "draw failure must release pending batches");
 
             TextRenderBatch cleared = renderer.add("C", 0, 0, 1, loader).batches().get(0);
+            GlyphAtlasUpload clearedUpload = cleared.upload();
             loader.requireGlyph('D');
             renderer.clear();
-            assertTrue(cleared.upload().isClosed(), "clear must release pending batches");
+            assertTrue(cleared.isClosed(), "clear must invalidate the borrowed batch");
+            assertTrue(clearedUpload.isClosed(), "clear must release pending batches");
         }
     }
 
