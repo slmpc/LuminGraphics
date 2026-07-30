@@ -101,3 +101,7 @@ registerGlShaderTest("shaderGlDsaTest", 4, 5)
 tasks.named<Test>("test") {
     exclude("**/ShaderGlContextTest.class")
 }
+
+tasks.withType<org.gradle.api.tasks.compile.JavaCompile>().configureEach {
+    options.compilerArgs.addAll(listOf("-Xlint:all", "-Werror"))
+}
