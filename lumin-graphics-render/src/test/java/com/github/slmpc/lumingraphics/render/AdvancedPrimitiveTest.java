@@ -4,6 +4,7 @@ import com.github.slmpc.lumingraphics.core.geometry.LuminColor;
 import com.github.slmpc.lumingraphics.render.renderer.RendererSet;
 import com.github.slmpc.lumingraphics.render.scheduler.GlyphQuad;
 import com.github.slmpc.lumingraphics.render.scheduler.Render2DBounds;
+import com.github.slmpc.lumingraphics.render.scheduler.Render2DCommand;
 import com.github.slmpc.lumingraphics.render.scheduler.Render2DScissor;
 import com.github.slmpc.lumingraphics.render.scheduler.Render2DScheduler;
 import com.github.slmpc.lumingraphics.render.scheduler.Render2DTexture;
@@ -134,9 +135,32 @@ class AdvancedPrimitiveTest {
             assertThrows(IllegalArgumentException.class,
                     () -> layer.addSegmentedShadow(BOUNDS, 1, 1, 1, 1, 2, TL,
                             new float[]{0, 0, -1, 2}, new float[]{1}, 1));
+            assertThrows(IllegalArgumentException.class,
+                    () -> layer.addSegmentedShadow(BOUNDS, 1, 1, 1, 1, 2, TL,
+                            new float[]{Float.MAX_VALUE, 0, Float.MAX_VALUE, 1}, new float[]{1}, 1));
+            assertThrows(IllegalArgumentException.class,
+                    () -> layer.addSegmentedShadow(BOUNDS, 1, 1, 1, 1, 2, TL,
+                            new float[]{0, Float.MAX_VALUE, 1, Float.MAX_VALUE}, new float[]{1}, 1));
+            assertThrows(IllegalArgumentException.class,
+                    () -> layer.addSegmentedShadow(BOUNDS, 1, 1, 1, 1, 2, TL,
+                            new float[]{Float.NaN, 0, 1, 1}, new float[]{1}, 1));
+            assertThrows(IllegalArgumentException.class,
+                    () -> layer.addSegmentedShadow(BOUNDS, 1, 1, 1, 1, 2, TL,
+                            new float[]{0, Float.POSITIVE_INFINITY, 1, 1}, new float[]{1}, 1));
             assertThrows(IllegalArgumentException.class, () -> layer.addRectOutline(null, 1, TL));
             assertTrue(scheduler.isEmpty());
         }
+        float nearMax = Float.MAX_VALUE / 2;
+        var finiteNearMax = new Render2DCommand.SegmentedShadow(0, 0, BOUNDS, null,
+                1, 1, 1, 1, 2, TL,
+                new float[]{nearMax, nearMax, nearMax, nearMax}, new float[]{1}, 1);
+        assertArrayEquals(new float[]{nearMax, nearMax, nearMax, nearMax}, finiteNearMax.segmentRects());
+        var negativeCoordinates = new Render2DCommand.SegmentedShadow(0, 0, BOUNDS, null,
+                1, 1, 1, 1, 2, TL,
+                new float[]{-Float.MAX_VALUE, -Float.MAX_VALUE, Float.MAX_VALUE, Float.MAX_VALUE},
+                new float[]{1}, 1);
+        assertArrayEquals(new float[]{-Float.MAX_VALUE, -Float.MAX_VALUE, Float.MAX_VALUE, Float.MAX_VALUE},
+                negativeCoordinates.segmentRects());
         FakeRhi flipped = render(layer -> layer.addTexture(BOUNDS, new Render2DTexture.Resource("flip"),
                 1, 1, 0, 0, TL));
         assertFloatTuple(flipped.writes().get(0), 16, 1, 1);

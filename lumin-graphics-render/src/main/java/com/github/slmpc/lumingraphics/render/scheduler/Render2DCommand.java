@@ -49,6 +49,8 @@ public sealed interface Render2DCommand permits Render2DCommand.Shadow, Render2D
                 finite("segment y", segmentRects[offset + 1]);
                 nonNegative("segment width", segmentRects[offset + 2]);
                 nonNegative("segment height", segmentRects[offset + 3]);
+                finite("segment right", segmentRects[offset] + segmentRects[offset + 2]);
+                finite("segment bottom", segmentRects[offset + 1] + segmentRects[offset + 3]);
                 nonNegative("segment radius", segmentRadii[i]);
             }
             shapeBounds.expand(blurRadius);
