@@ -1,5 +1,8 @@
 # Epsilon migration surface
 
+See the [documentation index](../README.md) and [library guide](../guide.md)
+for the current module/API workflow.
+
 `epsilon-surface.csv` is the source-to-owner contract for the Epsilon graphics and UI extraction. Its `source` paths are relative to `common/src/main/java/com/github/epsilon` in the source repository identified by `source_commit`.
 
 The columns are:

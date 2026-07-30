@@ -1,5 +1,8 @@
 # Epsilon resource manifest
 
+See the [documentation index](../README.md) and [library guide](../guide.md)
+for shader generation and module ownership.
+
 `manifest.csv` records source bytes only; it does not copy or rewrite runtime assets. Its `source` paths are relative to `common/src/main/resources/assets/epsilon` in the Epsilon repository, while every `target` is in `assets/lumin_graphics/`.
 
 The columns are:
