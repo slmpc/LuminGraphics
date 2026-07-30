@@ -167,6 +167,46 @@ tasks.named("check") {
     dependsOn("verifyTopology")
 }
 
+val architectureCheck by tasks.registering(Test::class) {
+    group = "verification"
+    description = "Checks the four published modules, their GAV graph, JAR namespaces, and migration ledgers."
+    val coreSourceSets = project(":lumin-graphics-core").extensions.getByType<org.gradle.api.tasks.SourceSetContainer>()
+    dependsOn(":lumin-graphics-core:testClasses")
+    dependsOn(luminPublishedJavaModules.map { ":$it:jar" })
+    testClassesDirs = coreSourceSets["test"].output.classesDirs
+    classpath = coreSourceSets["test"].runtimeClasspath
+    include("**/PublishedArchitectureTest.class")
+    useJUnitPlatform()
+    testLogging.showStandardStreams = true
+    binaryResultsDirectory.set(layout.buildDirectory.dir("test-results/architectureCheck/binary"))
+    reports.junitXml.outputLocation.set(layout.buildDirectory.dir("test-results/architectureCheck"))
+    reports.html.outputLocation.set(layout.buildDirectory.dir("reports/tests/architectureCheck"))
+    systemProperty("lumin.root", rootProject.projectDir.absolutePath)
+    doLast {
+        fun apiEdges(name: String) = project(":$name").configurations.getByName("api").dependencies
+            .filterIsInstance<ProjectDependency>().map { it.path }.toSet()
+        val expected = mapOf(
+            "lumin-graphics-core" to emptySet(),
+            "lumin-graphics-render" to setOf(":lumin-graphics-core"),
+            "lumin-graphics-text" to setOf(":lumin-graphics-render"),
+            "lumin-graphics-ui" to setOf(":lumin-graphics-text"),
+        )
+        check(expected.all { (name, edges) -> apiEdges(name) == edges }) {
+            "published GAV graph is not one-way: ${expected.keys.associateWith(::apiEdges)}"
+        }
+        val external = luminPublishedJavaModules.flatMap { name ->
+            project(":$name").configurations.getByName("api").dependencies.filterNot { it is ProjectDependency }
+        }
+        check(external.map { "${it.group}:${it.name}" }.toSet() == setOf(
+            "$prismGroup:prism-rhi-core", "org.lwjgl:lwjgl-bom", "org.lwjgl:lwjgl", "org.lwjgl:lwjgl-stb",
+        )) { "unexpected published external GAV graph: ${external.map { "${it.group}:${it.name}:${it.version}" }}" }
+        check(external.single { it.group == prismGroup }.version == prismVersion)
+        check(external.single { it.name == "lwjgl-bom" }.version == "3.4.1")
+        check(external.filter { it.name == "lwjgl" || it.name == "lwjgl-stb" }.all { it.version == null })
+        println("ARCH_LUMIN_DEPENDENCIES projectEdges=3 externalEdges=${external.size}")
+    }
+}
+
 for (smoke in listOf("gl41Smoke", "glDsaSmoke", "vulkanSmoke", "wrongContextSmoke", "missingShaderSmoke")) {
     tasks.register(smoke) {
         group = "verification"
