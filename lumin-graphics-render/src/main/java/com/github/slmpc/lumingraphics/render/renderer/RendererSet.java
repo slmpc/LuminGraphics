@@ -19,7 +19,7 @@ public final class RendererSet implements AutoCloseable {
         if (resources == null || capacityPerRenderer <= 0) throw new IllegalArgumentException("renderer set inputs are invalid");
         var map = new EnumMap<com.github.slmpc.lumingraphics.render.scheduler.Render2DCommandKind, Renderer>(
                 com.github.slmpc.lumingraphics.render.scheduler.Render2DCommandKind.class);
-        map.put(com.github.slmpc.lumingraphics.render.scheduler.Render2DCommandKind.SHADOW, new ShadowRenderer(resources, capacityPerRenderer));
+        map.put(com.github.slmpc.lumingraphics.render.scheduler.Render2DCommandKind.SHADOW, new ShadowDispatchRenderer(resources, capacityPerRenderer));
         map.put(com.github.slmpc.lumingraphics.render.scheduler.Render2DCommandKind.ROUND_RECT, new RoundRectRenderer(resources, capacityPerRenderer));
         map.put(com.github.slmpc.lumingraphics.render.scheduler.Render2DCommandKind.ROUND_RECT_OUTLINE, new RoundRectOutlineRenderer(resources, capacityPerRenderer));
         map.put(com.github.slmpc.lumingraphics.render.scheduler.Render2DCommandKind.RECT, new RectRenderer(resources, capacityPerRenderer));

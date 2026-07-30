@@ -1,6 +1,7 @@
 package com.github.slmpc.lumingraphics.render;
 
 import com.github.slmpc.lumingraphics.render.scheduler.Render2DTexture;
+import com.github.slmpc.lumingraphics.render.scheduler.Render2DCommand;
 import com.github.slmpc.prismrhi.backend.BackendApi;
 import com.github.slmpc.prismrhi.command.RhiCommandBuffer;
 import com.github.slmpc.prismrhi.descriptor.RhiDescriptorSet;
@@ -19,6 +20,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 final class FakeRhi {
     private final List<String> trace = new ArrayList<>();
     private final List<String> pipelines = new ArrayList<>();
+    private final List<byte[]> writes = new ArrayList<>();
+    private final List<Render2DCommand.SegmentedShadow> segmentedPayloads = new ArrayList<>();
     private int closedBuffers;
     private boolean failNextDraw;
     private String missingPipeline;
@@ -51,6 +54,11 @@ final class FakeRhi {
                 trace.add("descriptor=" + id);
                 return proxy(RhiDescriptorSet.class, FakeRhi::resourceCall);
             }
+            @Override public RhiDescriptorSet requireSegmentedShadowDescriptor(Render2DCommand.SegmentedShadow shadow) {
+                segmentedPayloads.add(shadow);
+                trace.add("segmentedDescriptor=" + shadow.segmentCount());
+                return proxy(RhiDescriptorSet.class, FakeRhi::resourceCall);
+            }
         };
     }
 
@@ -60,6 +68,8 @@ final class FakeRhi {
 
     List<String> trace() { return List.copyOf(trace); }
     List<String> boundPipelines() { return List.copyOf(pipelines); }
+    List<byte[]> writes() { return writes.stream().map(byte[]::clone).toList(); }
+    List<Render2DCommand.SegmentedShadow> segmentedPayloads() { return List.copyOf(segmentedPayloads); }
     int closedBuffers() { return closedBuffers; }
     void failNextDraw() { failNextDraw = true; }
     void missingPipeline(String id) { missingPipeline = id; }
@@ -70,7 +80,14 @@ final class FakeRhi {
         return proxy(RhiBuffer.class, (self, method, args) -> switch (method.getName()) {
             case "api" -> BackendApi.VULKAN;
             case "size" -> size;
-            case "write" -> { trace.add("write=" + args[0] + ":" + ((ByteBuffer) args[1]).remaining()); yield null; }
+            case "write" -> {
+                ByteBuffer source = ((ByteBuffer) args[1]).slice();
+                byte[] bytes = new byte[source.remaining()];
+                source.get(bytes);
+                writes.add(bytes);
+                trace.add("write=" + args[0] + ":" + bytes.length);
+                yield null;
+            }
             case "close" -> { if (closed.compareAndSet(false, true)) closedBuffers++; yield null; }
             default -> defaultValue(method);
         });

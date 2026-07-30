@@ -6,6 +6,7 @@ public final class LuminRenderPipelines {
     public static final String ROUND_RECTANGLE = "round-rectangle";
     public static final String ROUND_RECTANGLE_OUTLINE = "round-rectangle-outline";
     public static final String SHADOW = "shadow";
+    public static final String SEGMENTED_SHADOW = "segmented-shadow";
     public static final String TEXTURE = "texture";
     public static final String TRIANGLE = "triangle";
     public static final String TTF_FONT_AA = "ttf-font-aa";

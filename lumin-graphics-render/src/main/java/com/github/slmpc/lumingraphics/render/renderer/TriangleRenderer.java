@@ -4,5 +4,7 @@ import com.github.slmpc.lumingraphics.render.immediate.VertexBatch;
 import com.github.slmpc.lumingraphics.render.scheduler.Render2DCommand;
 public final class TriangleRenderer extends AbstractRenderer<Render2DCommand.Triangle> {
     public TriangleRenderer(RenderResources r, int c) { super(Render2DCommand.Triangle.class, r, c, "triangle"); }
-    @Override protected VertexBatch vertices(Render2DCommand.Triangle c) { return VertexBatches.triangle(c.x1(), c.y1(), c.x2(), c.y2(), c.x3(), c.y3(), c.color()); }
+    @Override protected VertexBatch vertices(Render2DCommand.Triangle c) {
+        return VertexBatches.triangle(c.centerX(), c.centerY(), c.size(), c.progress(), c.color());
+    }
 }

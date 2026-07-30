@@ -3,7 +3,7 @@ package com.github.slmpc.lumingraphics.render.scheduler;
 public record Render2DBounds(float x, float y, float width, float height) {
     public Render2DBounds {
         if (!Float.isFinite(x) || !Float.isFinite(y) || !Float.isFinite(width) || !Float.isFinite(height)
-                || width < 0 || height < 0) {
+                || width < 0 || height < 0 || !Float.isFinite(x + width) || !Float.isFinite(y + height)) {
             throw new IllegalArgumentException("render bounds must be finite and non-negative");
         }
     }
