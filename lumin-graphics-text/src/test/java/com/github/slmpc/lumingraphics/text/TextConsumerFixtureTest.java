@@ -1,6 +1,5 @@
 package com.github.slmpc.lumingraphics.text;
 import com.github.slmpc.lumingraphics.text.font.FontClosedException;
-import com.github.slmpc.lumingraphics.text.font.FontResource;
 import com.github.slmpc.lumingraphics.text.ttf.TtfFontFile;
 import com.github.slmpc.lumingraphics.text.atlas.GlyphAtlasUpload;
 import com.github.slmpc.lumingraphics.text.atlas.GlyphAtlasUploader;
@@ -22,8 +21,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.Test;
 
 class TextConsumerFixtureTest {
-    private static final String ROOT = "assets/lumin_graphics/fonts/";
-
     @Test
     void printsStableConsumerTraceAcrossFontsIconAndEmojiFallback() {
         List<String> ownership = new ArrayList<>();
@@ -35,7 +32,7 @@ class TextConsumerFixtureTest {
         List<String> fontMetrics = new ArrayList<>();
         boolean defaultSupportsEmoji;
         for (String name : List.of("font.ttf", "icons.ttf", "jura-light.ttf", "osakachips.ttf")) {
-            try (TtfFontFile file = TtfFontFile.open(FontResource.classpath(ROOT + name), 48, 4)) {
+            try (TtfFontFile file = TtfFontFile.open(TestFonts.resource(name), 48, 4)) {
                 fontMetrics.add(name + "=" + file.metrics().ascent() + "/" + file.metrics().lineHeight()
                         + "/" + file.advance('A'));
                 if (name.equals("font.ttf")) {
@@ -45,9 +42,9 @@ class TextConsumerFixtureTest {
             }
         }
 
-        TtfFontLoader text = new TtfFontLoader(FontResource.classpath(ROOT + "font.ttf"),
+        TtfFontLoader text = new TtfFontLoader(TestFonts.resource("font.ttf"),
                 48, 4, 128, 128, 2, textUploader, Runnable::run);
-        TtfFontLoader icons = new TtfFontLoader(FontResource.classpath(ROOT + "icons.ttf"),
+        TtfFontLoader icons = new TtfFontLoader(TestFonts.resource("icons.ttf"),
                 48, 4, 128, 128, 2, iconUploader, Runnable::run);
         SystemEmojiAtlas emoji = new SystemEmojiAtlas(64, 64, 24, emojiUploader);
         TextLayoutEngine engine = new TextLayoutEngine();

@@ -13,11 +13,21 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * 以名称管理同一 Prism 上下文内资源的所有权和失效状态。
+ *
+ * <p>资源名称在注册表内唯一。关闭时按注册的逆序释放资源，从而先释放后创建的依赖对象。
+ * 注册表本身不负责创建 Prism 资源。</p>
+ */
 public final class ResourceRegistry implements AutoCloseable {
     private final RhiContextIdentity contextIdentity;
     private final Map<String, ManagedResource<?>> resources = new LinkedHashMap<>();
     private boolean closed;
 
+    /**
+     * 创建与给定 Prism 上下文绑定的注册表。
+     * @param contextIdentity 所有登记资源必须匹配的上下文标识
+     */
     public ResourceRegistry(RhiContextIdentity contextIdentity) {
         if (contextIdentity == null) {
             throw new LuminValidationException("resource registry context must not be null");
@@ -25,6 +35,16 @@ public final class ResourceRegistry implements AutoCloseable {
         this.contextIdentity = contextIdentity;
     }
 
+    /**
+     * 登记一个资源。
+     *
+     * @param name 调试和查找用的非空白唯一名称
+     * @param resource 调用方已经创建的 Prism 资源
+     * @param ownership 资源关闭职责
+     * @param invalidationToken 与资源上下文关联的失效令牌
+     * @param <T> 已登记 Prism 资源的具体类型
+     * @return 包含所有权和有效性检查的资源包装器
+     */
     public synchronized <T extends RhiResource> ManagedResource<T> register(
             String name, T resource, RhiOwnership ownership, RhiInvalidationToken invalidationToken
     ) {
@@ -43,10 +63,15 @@ public final class ResourceRegistry implements AutoCloseable {
         return managed;
     }
 
+    /**
+     * 返回当前登记资源数。
+     * @return 已登记资源数
+     */
     public synchronized int size() {
         return resources.size();
     }
 
+    /** 标记全部已登记资源为失效，但不关闭它们。 */
     public synchronized void invalidateAll() {
         requireOpen();
         resources.values().forEach(ManagedResource::invalidate);

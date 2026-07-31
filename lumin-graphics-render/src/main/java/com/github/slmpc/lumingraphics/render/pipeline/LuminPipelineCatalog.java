@@ -9,10 +9,11 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Backend-neutral descriptions consumed by renderers when creating Prism pipelines.
- * Retained GLSL 410 sources compile directly on GL41/DSA. The build tool changes only
- * the version header to 450 and defines {@code LUMIN_VULKAN=1}, enabling explicit
- * descriptor bindings and Vulkan's vertex-index spelling before Prism Shaderc runs.
+ * 创建 Prism 管线时使用的后端无关描述表。
+ *
+ * <p>GL41/DSA 直接使用保留的 GLSL 410 源码。构建任务在交给 Prism Shaderc 前仅把版本头改为
+ * 450 并定义 {@code LUMIN_VULKAN=1}，从而启用 Vulkan 所需的显式 descriptor binding 和顶点
+ * 索引拼写。调用方应通过 {@link #entries()} 或 {@link #require(String)} 查询，而不是复制路径。</p>
  */
 public final class LuminPipelineCatalog {
     public static final FrameAbi FRAME_ABI = new FrameAbi("LuminFrame", 0, "Projection", "Viewport");
@@ -22,10 +23,12 @@ public final class LuminPipelineCatalog {
     private LuminPipelineCatalog() {
     }
 
+    /** 返回稳定且不可修改的全部管线描述。 */
     public static List<PipelineDescriptor> entries() {
         return ENTRIES;
     }
 
+    /** 按稳定 ID 返回管线描述；未知 ID 会抛出 {@link IllegalArgumentException}。 */
     public static PipelineDescriptor require(String id) {
         return ENTRIES.stream().filter(entry -> entry.id().equals(id)).findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("unknown pipeline: " + id));

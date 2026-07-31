@@ -22,15 +22,15 @@ generated Vulkan 1.3/SPIR-V 1.6 resources. Validate with `shaderCompileTest`;
 `shaderGl41Test` and `shaderGlDsaTest` additionally compile/link the catalog in
 hidden OpenGL contexts. Never edit generated outputs.
 
-The resource manifest contains 37 shader and 4 font entries. The migration
-ledger contains 53 rows, with the four published graphics modules plus
-version-specific common surfaces. Read [resources](resources/README.md) and
-[migration](migration/README.md) before changing either ledger.
+The resource manifest contains 37 shader entries. Font data is not packaged:
+callers provide a `FontResource`, normally with `FontResource.path(Path)`, when
+creating a `TtfFontLoader`. The migration ledger contains 53 rows, with the
+four published graphics modules plus version-specific common surfaces. Read
+[resources](resources/README.md) and [migration](migration/README.md) before
+changing either ledger.
 
-## Demo And Local Maven
+## Demo
 
 `lumin-graphics-demo` supplies `StandaloneSmoke`, `VulkanStandaloneSmoke`, and
 `CallerOwnedVulkanContext`. Run `gl41Smoke`, `glDsaSmoke`, `vulkanSmoke`,
-`wrongContextSmoke`, or `missingShaderSmoke` through the root wrapper. Use an
-absolute local Maven repository for Prism resolution, for example
-`-Dmaven.repo.local=D:\m2-prism`; no public registry is supported.
+`wrongContextSmoke`, or `missingShaderSmoke` through the root wrapper.

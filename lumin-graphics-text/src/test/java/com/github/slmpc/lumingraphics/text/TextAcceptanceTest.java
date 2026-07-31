@@ -13,50 +13,28 @@ import com.github.slmpc.lumingraphics.text.icon.IconChars;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.io.InputStream;
-import java.security.MessageDigest;
-import java.util.HexFormat;
 import java.util.List;
-import java.util.Map;
-import java.util.Properties;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.Test;
 
 class TextAcceptanceTest {
-    private static final FontResource FONT = FontResource.classpath("assets/lumin_graphics/fonts/font.ttf");
+    private static final FontResource FONT = TestFonts.resource("font.ttf");
 
     @Test
-    void iconCharsMapToConcreteBundledIconGlyphs() {
+    void iconCharsMapToConcreteCallerSuppliedIconGlyphs() {
         assertEquals("\ue8b6", IconChars.SEARCH);
         assertEquals("\ue5cd", IconChars.CLOSE);
         try (TtfFontFile icons = TtfFontFile.open(
-                FontResource.classpath("assets/lumin_graphics/fonts/icons.ttf"), 48, 4)) {
+                TestFonts.resource("icons.ttf"), 48, 4)) {
             assertTrue(icons.hasGlyph(IconChars.SEARCH.codePointAt(0)), "MIG-TEXT-ICON-CHARS");
             assertTrue(icons.rasterize(IconChars.CLOSE.codePointAt(0)).pixels().length > 0);
         }
     }
 
     @Test
-    void bundledResourceManifestMatchesBytesAndLocalOnlyGate() throws Exception {
-        Properties manifest = new Properties();
-        try (InputStream input = getClass().getResourceAsStream("/assets/lumin_graphics/fonts/manifest.properties")) {
-            assertNotNull(input);
-            manifest.load(input);
-        }
-        assertTrue(manifest.getProperty("redistribution").startsWith("local-only"));
-        Map<String, Long> expectedSizes = Map.of(
-                "font.ttf", 8227312L, "icons.ttf", 1373900L,
-                "jura-light.ttf", 154312L, "osakachips.ttf", 24832L);
-        for (Map.Entry<String, Long> entry : expectedSizes.entrySet()) {
-            byte[] bytes;
-            try (InputStream input = getClass().getResourceAsStream("/assets/lumin_graphics/fonts/" + entry.getKey())) {
-                assertNotNull(input);
-                bytes = input.readAllBytes();
-            }
-            assertEquals(entry.getValue().longValue(), bytes.length);
-            String hash = HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(bytes));
-            assertEquals(manifest.getProperty(entry.getKey() + ".sha256"), hash);
-        }
+    void fontsAreCallerSuppliedRatherThanPackagedResources() throws Exception {
+        assertNull(getClass().getResource("/assets/lumin_graphics/fonts/font.ttf"));
+        assertTrue(TestFonts.resource("font.ttf").read().length > 0);
     }
 
     @Test

@@ -22,7 +22,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.Test;
 
 class TextDrawContractTest {
-    private static final FontResource FONT = FontResource.classpath("assets/lumin_graphics/fonts/font.ttf");
+    private static final FontResource FONT = TestFonts.resource("font.ttf");
 
     @Test
     void styledAndRotatedDrawsReachSinkExactlyInAddOrder() {

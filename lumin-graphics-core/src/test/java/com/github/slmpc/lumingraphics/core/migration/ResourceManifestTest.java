@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
 
 class ResourceManifestTest {
-    private static final Set<String> TYPES = Set.of("shader", "font");
+    private static final Set<String> TYPES = Set.of("shader");
 
     @Test
     void validatesResourceManifestAgainstActualEpsilonBytes() throws Exception {
@@ -26,12 +26,10 @@ class ResourceManifestTest {
         assertTrue(Files.isRegularFile(manifest), "Resource manifest is missing: " + manifest);
 
         List<Map<String, String>> rows = CsvTable.read(manifest);
-        assertEquals(41, rows.size(), "Resource manifest must contain exactly 41 data rows");
+        assertEquals(37, rows.size(), "Resource manifest must contain exactly 37 shader rows");
         assertRequiredFields(rows);
         assertEquals(37, rows.stream().filter(row -> row.get("type").equals("shader")).count(),
                 "Resource manifest must contain 37 shaders");
-        assertEquals(4, rows.stream().filter(row -> row.get("type").equals("font")).count(),
-                "Resource manifest must contain four fonts");
 
         Set<String> sources = uniqueValues(rows, "source", "Duplicate resource source");
         uniqueValues(rows, "target", "Duplicate resource target");
@@ -89,13 +87,11 @@ class ResourceManifestTest {
     private static Set<String> actualResources() throws IOException {
         Path root = MigrationManifestTest.epsilonRoot()
                 .resolve("common/src/main/resources/assets/epsilon");
-        try (var shaders = Files.walk(root.resolve("shaders"));
-                var fonts = Files.walk(root.resolve("fonts"))) {
-            Set<String> resources = java.util.stream.Stream.concat(shaders, fonts)
-                    .filter(Files::isRegularFile)
+        try (var shaders = Files.walk(root.resolve("shaders"))) {
+            Set<String> resources = shaders.filter(Files::isRegularFile)
                     .map(path -> root.relativize(path).toString().replace('\\', '/'))
                     .collect(Collectors.toSet());
-            assertEquals(41, resources.size(), "Actual Epsilon resource inventory changed");
+            assertEquals(37, resources.size(), "Actual Epsilon shader inventory changed");
             return resources;
         }
     }

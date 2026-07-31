@@ -40,13 +40,23 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
 
+/**
+ * 一帧 UI 节点的不可变快照。
+ *
+ * <p>使用 {@link #build(Consumer)} 或 {@link #layout(UiRect, Consumer)} 构建树。{@link Scope} 中的
+ * 坐标相对当前 bound；容器、裁剪和 viewport 节点会在 {@link #validate()} 和 renderer 中递归处理。</p>
+ */
 public final class UiTree {
     private final List<UiNode> nodes;
     private final boolean activeAnimations;
     private UiTree(List<UiNode> nodes, boolean activeAnimations) { this.nodes = UiNodes.copy(nodes); this.activeAnimations = activeAnimations; }
+    /** 从已有节点列表创建快照。 */
     public static UiTree of(List<UiNode> nodes) { return new UiTree(nodes, false); }
+    /** 获取 scope 当前状态的快照。 */
     public static UiTree from(Scope scope) { return Objects.requireNonNull(scope).snapshot(); }
+    /** 使用根 scope 构建一棵 UI 树。 */
     public static UiTree build(Consumer<Scope> content) { Scope scope = new Scope(); content.accept(scope); return scope.snapshot(); }
+    /** 在给定根区域内构建一棵 UI 树。 */
     public static UiTree layout(UiRect bounds, Consumer<LayoutScope> content) {
         Scope scope = new Scope(); content.accept(new LayoutScope(scope, bounds)); return scope.snapshot();
     }
@@ -55,6 +65,11 @@ public final class UiTree {
     public boolean hasActiveAnimations() { return activeAnimations; }
     public void walk(Consumer<UiNode> visitor) { walk(nodes, Objects.requireNonNull(visitor)); }
     private static void walk(List<UiNode> values, Consumer<UiNode> visitor) { for (UiNode node : values) { visitor.accept(node); if(node instanceof Layer layer)walk(layer.children(),visitor);else if(node instanceof Layered layered)walk(List.of(layered.child()),visitor);else if(node instanceof Scissor scissor)walk(scissor.children(),visitor);else if(node instanceof Viewport viewport)walk(viewport.children(),visitor); } }
+    /**
+     * 校验裁剪、viewport 与子节点边界关系。
+     *
+     * @throws UiMalformedTreeException 当嵌套裁剪不相交或节点位于父裁剪外时
+     */
     public void validate() { validate(nodes, null); }
     private static int count(List<UiNode> values) {
         int count = 0;
@@ -109,6 +124,7 @@ public final class UiTree {
         return null;
     }
 
+    /** 用于构建 UI 树的可变作用域；完成后通过 {@link #snapshot()} 取得不可变快照。 */
     public static final class Scope {
         private List<UiNode> nodes = new ArrayList<>();
         private final List<UiRect> bounds = new ArrayList<>(List.of(new UiRect(0, 0, 0, 0)));
@@ -117,6 +133,7 @@ public final class UiTree {
         public UiTree snapshot() { return new UiTree(nodes, active); }
         public void add(UiNode node) { nodes.add(Objects.requireNonNull(node)); }
         public void clear() { nodes.clear(); active = false; bounds.clear(); bounds.add(new UiRect(0,0,0,0)); }
+        /** 在相对当前 bound 的区域内执行内容构建。 */
         public void push(UiRect value, Consumer<Scope> content) { withBound(resolve(value), content); }
         public void push(float x, float y, Consumer<Scope> content) { withBound(new UiRect(rx(x), ry(y), 0, 0), content); }
         public void pushRelative(UiRect value,Consumer<Scope> content){push(value,content);} public void pushAbsolute(UiRect value,Consumer<Scope> content){withBound(value,content);}
@@ -124,7 +141,9 @@ public final class UiTree {
         public Stack stack(UiRect value){return new Stack(resolve(value));}
         public void stackPush(UiRect value) { bounds.add(resolve(value)); }
         public void stackPop() { if (bounds.size() == 1) throw new IllegalStateException("root bound cannot be popped"); bounds.remove(bounds.size()-1); }
+        /** 将子节点放入相对当前层的绘制层。 */
         public void layer(int layer, Consumer<Scope> content) { Capture capture = capture(content); nodes.add(new Layer(layer, capture.nodes)); active |= capture.active; }
+        /** 使用相对当前 bound 的区域裁剪子节点。 */
         public void scissor(UiRect clip, Consumer<Scope> content) { Capture capture = capture(content); nodes.add(new Scissor(resolve(clip), capture.nodes)); active |= capture.active; }
         public void scissor(float x,float y,float w,float h,Consumer<Scope> content){scissor(new UiRect(x,y,w,h),content);}
         public float animate(UiAnimation animation, boolean target) { return animate(animation, target ? 1 : 0); }

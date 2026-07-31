@@ -2,6 +2,7 @@ package com.github.slmpc.lumingraphics.demo;
 
 import com.github.slmpc.lumingraphics.render.pipeline.LuminPipelineCatalog;
 import com.github.slmpc.lumingraphics.render.shader.ShaderArtifactLibrary;
+import com.github.slmpc.lumingraphics.text.font.FontResource;
 import com.github.slmpc.lumingraphics.ui.control.Button;
 import com.github.slmpc.lumingraphics.ui.node.primitive.Rect;
 import com.github.slmpc.lumingraphics.ui.geometry.UiRect;
@@ -59,16 +60,17 @@ public final class StandaloneSmoke {
     public static void main(String[] args) throws Exception {
         String mode = args.length == 0 ? "gl41" : args[0];
         switch (mode) {
-            case "gl41" -> runGl("gl41", 4, 1, false);
-            case "gldsa" -> runGl("gldsa", 4, 5, false);
-            case "wrong-context" -> runGl("wrong-context", 4, 1, true);
+            case "gl41" -> runGl("gl41", 4, 1, false, fontResource());
+            case "gldsa" -> runGl("gldsa", 4, 5, false, fontResource());
+            case "wrong-context" -> runGl("wrong-context", 4, 1, true, fontResource());
             case "missing-shader" -> missingShader();
-            case "vulkan" -> VulkanStandaloneSmoke.run(evidenceDir());
+            case "vulkan" -> VulkanStandaloneSmoke.run(evidenceDir(), fontResource());
             default -> throw new IllegalArgumentException("unknown smoke mode: " + mode);
         }
     }
 
-    private static void runGl(String backend, int major, int minor, boolean wrongContext) throws Exception {
+    private static void runGl(String backend, int major, int minor, boolean wrongContext, FontResource font)
+            throws Exception {
         Path evidence = evidenceDir();
         Files.createDirectories(evidence);
         StringBuilder log = new StringBuilder();
@@ -116,11 +118,12 @@ public final class StandaloneSmoke {
             device = instance.createDevice(instance.enumeratePhysicalDevices().get(0),
                     RhiDeviceCreateInfo.builder().debugName("Lumin " + backend).build());
             int linked = compileCatalog(shaders, log);
-            exerciseCanonicalModel(log);
+            exerciseCanonicalModel(log, font);
             Map<String, Integer> contributions = new LinkedHashMap<>();
             StandaloneRenderAdapter.Trace trace;
             ByteBuffer pixels;
-            try (var adapter = new StandaloneRenderAdapter(device, com.github.slmpc.prismrhi.format.RhiFormat.RGBA8_UNORM);
+            try (var adapter = new StandaloneRenderAdapter(
+                    device, com.github.slmpc.prismrhi.format.RhiFormat.RGBA8_UNORM, font);
                  var pool = device.createCommandPool(new RhiCommandPoolCreateInfo(RhiQueueType.GRAPHICS, true, true))) {
                 var command = pool.allocateCommandBuffer(RhiCommandBufferLevel.PRIMARY);
                 var canonical = renderGlVariant(device, adapter, command, true, true, true, true, 1);
@@ -291,19 +294,22 @@ public final class StandaloneSmoke {
         }
     }
 
-    private static void exerciseCanonicalModel(StringBuilder log) throws IOException {
+    private static void exerciseCanonicalModel(StringBuilder log, FontResource font) throws IOException {
         Rect geometry = new Rect(new UiRect(20, 24, 116, 62), new LuminColor(.12f, .55f, .90f, 1));
         Button ui = new Button(new UiRect(151, 24, 148, 62), 8, new LuminColor(.92f, .28f, .30f, 1),
                 "Standalone", 1, new LuminColor(1, 1, 1, 1));
-        int fontBytes = 0;
-        for (String font : new String[]{"font.ttf", "icons.ttf", "jura-light.ttf", "osakachips.ttf"}) {
-            try (InputStream input = StandaloneSmoke.class.getResourceAsStream("/assets/lumin_graphics/fonts/" + font)) {
-                if (input != null) fontBytes += input.readAllBytes().length;
-            }
-        }
-        require(fontBytes > 0, "canonical text fonts were not loadable");
+        int fontBytes = font.read().length;
+        require(fontBytes > 0, "caller-supplied text font was not loadable");
         log.append("CANONICAL geometry=").append(geometry.bounds()).append(" ui=").append(ui.element().label())
                 .append(" text=Standalone fontBytes=").append(fontBytes).append(" effects=blur,fxaa\n");
+    }
+
+    private static FontResource fontResource() {
+        String configured = System.getProperty("lumin.demo.font");
+        if (configured == null || configured.isBlank()) {
+            throw new IllegalArgumentException("Set -Dlumin.demo.font=<path-to-ttf-or-otf>");
+        }
+        return FontResource.path(Path.of(configured));
     }
 
     private static ByteBuffer readPixels() {

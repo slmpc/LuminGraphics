@@ -43,13 +43,28 @@ import com.github.slmpc.lumingraphics.text.render.TextRenderer;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * 将 {@link UiTree} 转换为 {@link Render2DScheduler} 命令的 UI renderer。
+ *
+ * <p>纹理和字体始终由调用方的 {@link UiResourceResolver} 提供。每次 {@link #render(UiTree, UiRenderBatch, int)}
+ * 都会先验证树，文本批次则在配置了 {@link SchedulerTextBatchSink} 时绑定到当前 scheduler 层。</p>
+ */
 public final class LuminUiRenderer {
     private final TextRenderer text;
     private final UiResourceResolver resources;
     private final SchedulerTextBatchSink textSink;
+    /** 创建不自动绑定 scheduler 文本 sink 的 UI renderer。 */
     public LuminUiRenderer(TextRenderer text,UiResourceResolver resources){this(text,null,resources);}
+    /** 创建可将文本绘制绑定到 scheduler 层的 UI renderer。 */
     public LuminUiRenderer(TextRenderer text,SchedulerTextBatchSink textSink,UiResourceResolver resources){this.text=Objects.requireNonNull(text);this.textSink=textSink;this.resources=Objects.requireNonNull(resources);}
     public TextRenderer textRenderer(){return text;}
+    /**
+     * 校验并渲染一棵 UI 树。
+     *
+     * @param tree 当前帧 UI 快照
+     * @param batch 提供 scheduler、主题和基础层的批次
+     * @param relativeLayer 相对于 batch 基础层的附加层号
+     */
     public void render(UiTree tree,UiRenderBatch batch,int relativeLayer){Objects.requireNonNull(tree).validate();renderNodes(tree.nodes(),batch,batch.baseLayer()+relativeLayer,null);}
     private void renderNodes(List<UiNode> nodes,UiRenderBatch batch,int layer,UiRect clip){for(UiNode node:nodes)renderNode(node,batch,layer,clip);}
     private void renderNode(UiNode node,UiRenderBatch batch,int layer,UiRect clip){

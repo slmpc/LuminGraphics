@@ -20,7 +20,12 @@ import java.util.concurrent.FutureTask;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 
-/** MIG-TEXT-TTF-LOADER */
+/**
+ * 将调用方提供的 TTF/OTF 字体按需栅格化到 GPU 图集页。
+ *
+ * <p>同一 code point 的并发请求会合并为一次栅格化。关闭时未完成请求会被取消，所有图集页和字体文件
+ * 都会被关闭。上传器必须遵守调用方的图形线程契约。</p>
+ */
 public final class TtfFontLoader implements FontLoader {
     private final TtfFontFile font;
     private final int atlasWidth;
@@ -36,6 +41,18 @@ public final class TtfFontLoader implements FontLoader {
     private long atlasRevision;
     private boolean closed;
 
+    /**
+     * 创建字体 loader。
+     *
+     * @param resource 调用方提供的字体字节来源
+     * @param pixelHeight 栅格化像素高度
+     * @param padding 每个字形的额外像素边距
+     * @param atlasWidth 图集页宽度
+     * @param atlasHeight 图集页高度
+     * @param maxAtlasPages 最大图集页数
+     * @param uploader 将图集像素上传到后端的实现
+     * @param executor 执行栅格化工作的执行器
+     */
     public TtfFontLoader(FontResource resource, int pixelHeight, int padding, int atlasWidth, int atlasHeight,
                          int maxAtlasPages, GlyphAtlasUploader uploader, Executor executor) {
         if (maxAtlasPages <= 0) throw new IllegalArgumentException("maxAtlasPages must be positive");
@@ -47,6 +64,7 @@ public final class TtfFontLoader implements FontLoader {
         this.executor = Objects.requireNonNull(executor, "executor");
     }
 
+    /** 异步请求一个字形；订阅者可独立取消，重复请求会共享同一栅格化工作。 */
     @Override public synchronized CompletableFuture<GlyphDescriptor> requestGlyph(int codepoint) {
         ensureOpen();
         GlyphDescriptor loaded = glyphs.get(codepoint);
@@ -123,6 +141,7 @@ public final class TtfFontLoader implements FontLoader {
         return atlas;
     }
 
+    /** 同步取得字形；底层异步失败会按原有运行时异常传播。 */
     @Override public GlyphDescriptor requireGlyph(int codepoint) {
         try {
             return requestGlyph(codepoint).join();

@@ -2,6 +2,7 @@ package com.github.slmpc.lumingraphics.demo;
 
 import com.github.slmpc.lumingraphics.render.pipeline.LuminPipelineCatalog;
 import com.github.slmpc.lumingraphics.render.shader.ShaderArtifactLibrary;
+import com.github.slmpc.lumingraphics.text.font.FontResource;
 import com.github.slmpc.prismrhi.PrismRHI;
 import com.github.slmpc.prismrhi.backend.BackendFeature;
 import com.github.slmpc.prismrhi.backend.vulkan.VulkanBackendProvider;
@@ -57,7 +58,7 @@ final class VulkanStandaloneSmoke {
 
     private VulkanStandaloneSmoke() { }
 
-    static void run(Path evidence) throws Exception {
+    static void run(Path evidence, FontResource font) throws Exception {
         Files.createDirectories(evidence);
         StringBuilder log = new StringBuilder();
         try (CallerOwnedVulkanContext caller = CallerOwnedVulkanContext.create(WIDTH, HEIGHT)) {
@@ -80,7 +81,7 @@ final class VulkanStandaloneSmoke {
             var command = pool.allocateCommandBuffer(RhiCommandBufferLevel.PRIMARY);
             var available = device.createSemaphore();
             var finished = device.createSemaphore();
-            try (var adapter = new StandaloneRenderAdapter(device, RhiFormat.BGRA8_UNORM)) {
+            try (var adapter = new StandaloneRenderAdapter(device, RhiFormat.BGRA8_UNORM, font)) {
                 Variant canonical = renderVariant(caller, queue, adapter, command, output, outputView, readback,
                         true, true, true, true, 1, true);
                 Map<String, Integer> contributions = new LinkedHashMap<>();
@@ -95,7 +96,7 @@ final class VulkanStandaloneSmoke {
 
                 int imageIndex = swapchain.acquireNextImage(available);
                 var swapImage = swapchain.image(imageIndex);
-                try (var presentAdapter = new StandaloneRenderAdapter(device, swapImage.view().format())) {
+                try (var presentAdapter = new StandaloneRenderAdapter(device, swapImage.view().format(), font)) {
                     command.reset();
                     command.begin();
                     command.pipelineBarrier(RhiPipelineBarrier.builder().image(RhiImageBarrier.of(

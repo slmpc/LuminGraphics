@@ -6,11 +6,17 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.function.Supplier;
 
-/** MIG-TEXT-FONT-REGISTRY */
+/**
+ * 由应用定义字体 ID 到 {@link TtfFontLoader} 的注册表。
+ *
+ * <p>注册表拥有已登记 loader；关闭时会逐个关闭它们。UI 的字体 ID 可以通过
+ * {@code UiResourceResolver} 映射到这里的 loader。</p>
+ */
 public final class FontRegistry implements AutoCloseable {
     private final Map<String, TtfFontLoader> fonts = new LinkedHashMap<>();
     private boolean closed;
 
+    /** 注册一个唯一字体 ID，并返回注册后的 loader。 */
     public synchronized TtfFontLoader register(String name, Supplier<TtfFontLoader> factory) {
         ensureOpen();
         String key = normalize(name);
@@ -20,6 +26,7 @@ public final class FontRegistry implements AutoCloseable {
         return font;
     }
 
+    /** 返回指定字体；未知 ID 会抛出 {@link IllegalArgumentException}。 */
     public synchronized TtfFontLoader require(String name) {
         ensureOpen();
         TtfFontLoader font = fonts.get(normalize(name));

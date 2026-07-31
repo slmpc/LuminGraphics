@@ -4,9 +4,10 @@ import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.api.tasks.bundling.AbstractArchiveTask
 import org.gradle.api.tasks.compile.JavaCompile
+import org.gradle.api.tasks.javadoc.Javadoc
+import org.gradle.external.javadoc.StandardJavadocDocletOptions
 import org.gradle.api.tasks.testing.Test
 import org.gradle.jvm.toolchain.JavaLanguageVersion
-import java.security.MessageDigest
 
 plugins {
     base
@@ -35,6 +36,13 @@ subprojects {
         options.encoding = "UTF-8"
         options.release.set(17)
     }
+    tasks.withType<Javadoc>().configureEach {
+        (options as StandardJavadocDocletOptions).apply {
+            encoding = "UTF-8"
+            charSet = "UTF-8"
+            docEncoding = "UTF-8"
+        }
+    }
     tasks.withType<Test>().configureEach {
         useJUnitPlatform()
     }
@@ -62,6 +70,21 @@ configure(luminPublishedJavaModules.map(::project)) {
             create<MavenPublication>("mavenJava") {
                 from(components["java"])
                 artifactId = project.name
+            }
+        }
+    }
+}
+
+configure(luminPublishedModules.map(::project)) {
+    pluginManager.withPlugin("maven-publish") {
+        extensions.configure<PublishingExtension> {
+            providers.gradleProperty("publishRepository").orNull?.let { target ->
+                repositories {
+                    maven {
+                        name = "githubPages"
+                        url = uri(target)
+                    }
+                }
             }
         }
     }
@@ -127,17 +150,9 @@ tasks.register("verifyTopology") {
 
 tasks.register("verifyPrismArtifact") {
     group = "verification"
-    description = "Verifies the resolved Prism core artifact against Maven local."
+    description = "Verifies that the required Prism core artifact resolves."
 
     doLast {
-        val configuredRepository = System.getProperty("maven.repo.local")
-            ?.takeIf { it.isNotBlank() }
-            ?: File(System.getProperty("user.home"), ".m2/repository").absolutePath
-        val sourceArtifact = file(configuredRepository).resolve(
-            "com/github/slmpc/prismrhi/prism-rhi-core/$prismVersion/prism-rhi-core-$prismVersion.jar",
-        )
-        check(sourceArtifact.isFile) { "Expected Prism verifier artifact is missing from Maven local: $sourceArtifact" }
-
         val resolvedArtifact = project(":lumin-graphics-core")
             .configurations.getByName("compileClasspath")
             .resolvedConfiguration.resolvedArtifacts
@@ -147,19 +162,8 @@ tasks.register("verifyPrismArtifact") {
                     artifact.moduleVersion.id.version == prismVersion
             }
             .file
-        fun sha256(file: File): String = MessageDigest.getInstance("SHA-256")
-            .digest(file.readBytes())
-            .joinToString("") { byte -> "%02x".format(byte) }
-
-        val resolvedHash = sha256(resolvedArtifact)
-        val sourceHash = sha256(sourceArtifact)
-        check(resolvedHash == sourceHash) {
-            "Resolved Prism artifact does not match the Maven local verifier artifact"
-        }
         println("Prism coordinate: $prismGroup:prism-rhi-core:$prismVersion")
         println("Resolved artifact: ${resolvedArtifact.absolutePath}")
-        println("Verifier artifact: ${sourceArtifact.absolutePath}")
-        println("SHA-256: $resolvedHash")
     }
 }
 

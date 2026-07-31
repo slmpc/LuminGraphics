@@ -5,14 +5,10 @@ modules are `lumin-graphics-core`, `lumin-graphics-render`,
 `lumin-graphics-text`, `lumin-graphics-ui`, and `lumin-graphics-bom`; the demo
 is an internal smoke application.
 
-Start with the [documentation index](docs/README.md). Prism resolves through
-Gradle `mavenLocal()` and is never fetched from a public registry. Maven's
-default local repository is used unless `-Dmaven.repo.local` selects another.
+Start with the [documentation index](docs/README.md).
 
-```powershell
-.\gradlew.bat -Dmaven.repo.local=D:\m2-prism check
-.\gradlew.bat -Dmaven.repo.local=D:\m2-prism architectureCheck
-```
+Chinese documentation is available from [docs/zh-CN](docs/zh-CN/README.md),
+including setup, resource ownership, text/font integration, and UI rendering.
 
 The module direction is `core -> render -> text -> ui`. Shader inputs compile
 to deterministic generated resources; migration and retained assets are

@@ -111,7 +111,7 @@ final class StandaloneRenderAdapter implements RenderResources, UiResourceResolv
     private final Render2DTexture effectInput;
     private int textureSequence;
 
-    StandaloneRenderAdapter(RhiDevice device, RhiFormat colorFormat) {
+    StandaloneRenderAdapter(RhiDevice device, RhiFormat colorFormat, FontResource fontResource) {
         this.device = device;
         this.queue = device.queue(RhiQueueType.GRAPHICS);
         this.colorFormat = colorFormat;
@@ -135,7 +135,7 @@ final class StandaloneRenderAdapter implements RenderResources, UiResourceResolv
         sampler = device.createSampler(RhiSamplerCreateInfo.linearRepeat());
         createPipelines();
         effectInput = uploadRgba("fxaa-input", 32, 32, checkerboard(32, 32));
-        font = new TtfFontLoader(FontResource.classpath("assets/lumin_graphics/fonts/font.ttf"),
+        font = new TtfFontLoader(fontResource,
                 28, 3, 256, 128, 2, this::uploadAtlas, Runnable::run);
         textSink = new SchedulerTextBatchSink(this);
         textRenderer = new TtfTextRenderer(textSink);

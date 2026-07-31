@@ -27,7 +27,7 @@ docs/resources/            shader/font resource manifest
 | Shader pipeline | `lumin-graphics-render/build.gradle.kts` | Generates Vulkan SPIR-V resources. |
 | Demo modes | `lumin-graphics-demo/build.gradle.kts` | GL, Vulkan, and negative smokes. |
 | Migration scope | `docs/migration/epsilon-surface.csv` | 53 migrated API rows. |
-| Resource scope | `docs/resources/manifest.csv` | 37 shader plus 4 font entries. |
+| Resource scope | `docs/resources/manifest.csv` | 37 retained shader entries; fonts are caller-owned. |
 
 ## Code Map
 
@@ -53,8 +53,6 @@ configured for this repository.
 
 - Do not add an API edge from an earlier published module to a later one.
 - Do not publish `lumin-graphics-demo`.
-- Do not consume Prism from a public repository: set an absolute local Maven
-  repository with `-Dmaven.repo.local=<path>`.
 - Do not edit retained resource bytes or ledger hashes without their source
   migration work and validation.
 
@@ -66,9 +64,6 @@ configured for this repository.
 .\gradlew.bat :lumin-graphics-render:compileShaders shaderCompileTest
 .\gradlew.bat gl41Smoke glDsaSmoke vulkanSmoke
 ```
-
-Use `-Dmaven.repo.local=<absolute-local-prism-repository>` for tasks resolving
-Prism. This project documents local Maven use only; no public registry exists.
 
 ## Documentation
 

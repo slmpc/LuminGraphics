@@ -53,14 +53,14 @@ import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.api.DisplayName;
 
 class TextPipelineTest {
-    private static final FontResource FONT = FontResource.classpath("assets/lumin_graphics/fonts/font.ttf");
+    private static final FontResource FONT = TestFonts.resource("font.ttf");
 
     @Test
     @DisplayName("MIG-TEXT-TTF-FILE and MIG-TEXT-TTF-GLYPH real STB behavior")
-    void opensBundledFontsAndReportsConsistentRealStbMetrics() {
+    void opensCallerSuppliedFontsAndReportsConsistentRealStbMetrics() {
         for (String name : List.of("font.ttf", "icons.ttf", "jura-light.ttf", "osakachips.ttf")) {
             try (TtfFontFile font = TtfFontFile.open(
-                    FontResource.classpath("assets/lumin_graphics/fonts/" + name), 48, 4)) {
+                    TestFonts.resource(name), 48, 4)) {
                 assertTrue(font.metrics().ascent() > 0);
                 assertTrue(font.metrics().lineHeight() > 0);
                 assertTrue(font.scale() > 0.0f);

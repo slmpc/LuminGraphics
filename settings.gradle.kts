@@ -14,7 +14,7 @@ include(
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
-        mavenLocal()
+        maven("https://slmpc.github.io/maven-repository/")
         mavenCentral {
             content {
                 excludeGroup("com.github.slmpc.prismrhi")
