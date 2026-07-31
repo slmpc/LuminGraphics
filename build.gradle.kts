@@ -127,16 +127,16 @@ tasks.register("verifyTopology") {
 
 tasks.register("verifyPrismArtifact") {
     group = "verification"
-    description = "Verifies the resolved Prism core artifact against the explicit isolated repository."
+    description = "Verifies the resolved Prism core artifact against Maven local."
 
     doLast {
         val configuredRepository = System.getProperty("maven.repo.local")
             ?.takeIf { it.isNotBlank() }
-            ?: error("maven.repo.local must identify the isolated Prism repository")
+            ?: File(System.getProperty("user.home"), ".m2/repository").absolutePath
         val sourceArtifact = file(configuredRepository).resolve(
             "com/github/slmpc/prismrhi/prism-rhi-core/$prismVersion/prism-rhi-core-$prismVersion.jar",
         )
-        check(sourceArtifact.isFile) { "Expected Prism verifier artifact is missing: $sourceArtifact" }
+        check(sourceArtifact.isFile) { "Expected Prism verifier artifact is missing from Maven local: $sourceArtifact" }
 
         val resolvedArtifact = project(":lumin-graphics-core")
             .configurations.getByName("compileClasspath")
@@ -154,7 +154,7 @@ tasks.register("verifyPrismArtifact") {
         val resolvedHash = sha256(resolvedArtifact)
         val sourceHash = sha256(sourceArtifact)
         check(resolvedHash == sourceHash) {
-            "Resolved Prism artifact does not match the isolated verifier repository"
+            "Resolved Prism artifact does not match the Maven local verifier artifact"
         }
         println("Prism coordinate: $prismGroup:prism-rhi-core:$prismVersion")
         println("Resolved artifact: ${resolvedArtifact.absolutePath}")

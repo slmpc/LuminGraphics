@@ -13,12 +13,7 @@ out/
 .project
 .settings/
 
-.omo/evidence/
-.omo/cache/
-.omo/caches/
-.omo/boulder.json
-.omo/start-work/attempts/
-.omo/start-work/ledger.jsonl
+.omo/
 
 m2-runtime/
 m2-empty/

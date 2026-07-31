@@ -1,8 +1,9 @@
 # LuminGraphics Documentation
 
-All build and consumer workflows use a local Maven repository only. Set
-`-Dmaven.repo.local=<absolute-path>` to the repository containing PrismRHI 0.1.0;
-no public registry is part of this migration.
+All build and consumer workflows use Gradle `mavenLocal()` for PrismRHI. Maven's
+default local repository is used unless `-Dmaven.repo.local=<absolute-path>`
+selects another repository containing PrismRHI 0.1.0; no public registry is
+part of this migration.
 
 ## Index
 
