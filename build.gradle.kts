@@ -167,6 +167,12 @@ tasks.named("check") {
     dependsOn("verifyTopology")
 }
 
+project(":lumin-graphics-core") {
+    tasks.named<Test>("test") {
+        exclude("**/PublishedArchitectureTest.class")
+    }
+}
+
 val architectureCheck by tasks.registering(Test::class) {
     group = "verification"
     description = "Checks the four published modules, their GAV graph, JAR namespaces, and migration ledgers."
