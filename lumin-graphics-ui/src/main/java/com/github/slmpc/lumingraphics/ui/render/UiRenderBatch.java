@@ -1,10 +1,10 @@
 package com.github.slmpc.lumingraphics.ui.render;
 
-import com.github.slmpc.lumingraphics.render.RenderExecution;
+import com.github.slmpc.lumingraphics.render.frame.RenderExecution;
 import com.github.slmpc.lumingraphics.render.scheduler.Render2DScheduler;
-import com.github.slmpc.lumingraphics.text.TextDraw;
-import com.github.slmpc.lumingraphics.ui.UiTheme;
-import com.github.slmpc.lumingraphics.ui.UiTree;
+import com.github.slmpc.lumingraphics.text.render.TextDraw;
+import com.github.slmpc.lumingraphics.ui.theme.UiTheme;
+import com.github.slmpc.lumingraphics.ui.tree.UiTree;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -69,3 +69,4 @@ public final class UiRenderBatch implements AutoCloseable {
         if(failure!=null)throw failure;
     }
 }
+

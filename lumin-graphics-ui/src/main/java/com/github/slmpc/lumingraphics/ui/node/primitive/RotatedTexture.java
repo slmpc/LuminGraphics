@@ -1,0 +1,7 @@
+package com.github.slmpc.lumingraphics.ui.node.primitive;
+import com.github.slmpc.lumingraphics.ui.geometry.UiRect;
+import com.github.slmpc.lumingraphics.ui.tree.UiNode;
+import com.github.slmpc.lumingraphics.ui.tree.UiNodes;
+import com.github.slmpc.lumingraphics.core.geometry.LuminColor;
+public record RotatedTexture(String textureId,UiRect bounds,float u0,float v0,float u1,float v1,LuminColor color,float originX,float originY,float rotationDegrees) implements UiNode { public RotatedTexture { if(textureId==null||textureId.isBlank()) throw new IllegalArgumentException("texture id is blank"); UiNodes.require(bounds); UiNodes.require(color);UiNodes.unit(u0,v0,u1,v1);UiNodes.finite(originX,originY,rotationDegrees);if(u1<u0||v1<v0)throw new IllegalArgumentException("texture UV range is reversed"); } }
+

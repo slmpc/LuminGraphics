@@ -1,6 +1,6 @@
 package com.github.slmpc.lumingraphics.render.shader;
-import com.github.slmpc.lumingraphics.render.RenderExecution;
-import com.github.slmpc.lumingraphics.render.RenderResources;
+import com.github.slmpc.lumingraphics.render.frame.RenderExecution;
+import com.github.slmpc.lumingraphics.render.resource.RenderResources;
 import com.github.slmpc.lumingraphics.render.pipeline.LuminPipelineCatalog;
 public final class GlslSandbox extends FullscreenEffect {
     public GlslSandbox(RenderResources resources, int capacity, String pipeline) {

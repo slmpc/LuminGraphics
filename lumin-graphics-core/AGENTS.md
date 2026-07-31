@@ -9,8 +9,8 @@ contracts, geometry, vertex data, and texture primitives.
 
 | Area | Location |
 | --- | --- |
-| Contexts | `src/main/java/.../core/LuminGraphicsContext.java`, `RenderContext.java` |
-| Targets | `src/main/java/.../core/RenderTarget.java` |
+| Contexts | `src/main/java/.../core/context/LuminGraphicsContext.java`, `RenderContext.java` |
+| Targets | `src/main/java/.../core/target/RenderTarget.java` |
 | Resources and threading | `src/main/java/.../core/resource/`, `threading/` |
 | Geometry and vertices | `src/main/java/.../core/geometry/`, `vertex/` |
 | Textures | `src/main/java/.../core/texture/` |

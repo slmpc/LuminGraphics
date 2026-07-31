@@ -33,10 +33,10 @@ docs/resources/            shader/font resource manifest
 
 | Symbol/area | Location | Role |
 | --- | --- | --- |
-| `LuminGraphicsContext` | core `.../core/` | Library lifecycle/context surface. |
+| `LuminGraphicsContext` | core `.../core/context/` | Library lifecycle/context surface. |
 | `LuminRenderPipelines` | render `.../render/pipeline/` | Pipeline catalog. |
-| `TextRenderer` | text `.../text/` | Text batching/rendering. |
-| `UiTree` | UI `.../ui/` | UI hierarchy/layout root. |
+| `TextRenderer` | text `.../text/render/` | Text batching/rendering. |
+| `UiTree` | UI `.../ui/tree/` | UI hierarchy/layout root. |
 | `StandaloneSmoke` | demo `.../demo/` | Caller-owned smoke entrypoint. |
 
 Reference centrality is explicitly unmeasured: no LSP or codegraph service is

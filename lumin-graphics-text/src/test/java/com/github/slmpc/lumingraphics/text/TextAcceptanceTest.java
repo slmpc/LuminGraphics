@@ -1,4 +1,15 @@
 package com.github.slmpc.lumingraphics.text;
+import com.github.slmpc.lumingraphics.text.font.FontClosedException;
+import com.github.slmpc.lumingraphics.text.font.FontResource;
+import com.github.slmpc.lumingraphics.text.ttf.TtfFontFile;
+import com.github.slmpc.lumingraphics.text.atlas.AtlasPixels;
+import com.github.slmpc.lumingraphics.text.atlas.GlyphAtlasUpload;
+import com.github.slmpc.lumingraphics.text.atlas.GlyphAtlasUploader;
+import com.github.slmpc.lumingraphics.text.atlas.TtfFontLoader;
+import com.github.slmpc.lumingraphics.text.layout.TextLayout;
+import com.github.slmpc.lumingraphics.text.layout.TextRenderBatch;
+import com.github.slmpc.lumingraphics.text.render.TtfTextRenderer;
+import com.github.slmpc.lumingraphics.text.icon.IconChars;
 
 import static org.junit.jupiter.api.Assertions.*;
 

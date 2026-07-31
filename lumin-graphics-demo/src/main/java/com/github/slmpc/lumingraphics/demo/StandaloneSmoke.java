@@ -2,9 +2,9 @@ package com.github.slmpc.lumingraphics.demo;
 
 import com.github.slmpc.lumingraphics.render.pipeline.LuminPipelineCatalog;
 import com.github.slmpc.lumingraphics.render.shader.ShaderArtifactLibrary;
-import com.github.slmpc.lumingraphics.ui.Button;
-import com.github.slmpc.lumingraphics.ui.Rect;
-import com.github.slmpc.lumingraphics.ui.UiRect;
+import com.github.slmpc.lumingraphics.ui.control.Button;
+import com.github.slmpc.lumingraphics.ui.node.primitive.Rect;
+import com.github.slmpc.lumingraphics.ui.geometry.UiRect;
 import com.github.slmpc.lumingraphics.core.geometry.LuminColor;
 import com.github.slmpc.prismrhi.PrismRHI;
 import com.github.slmpc.prismrhi.backend.RhiBackendProvider;

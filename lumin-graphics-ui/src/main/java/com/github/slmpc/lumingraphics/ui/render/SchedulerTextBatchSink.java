@@ -3,9 +3,9 @@ package com.github.slmpc.lumingraphics.ui.render;
 import com.github.slmpc.lumingraphics.render.scheduler.GlyphQuad;
 import com.github.slmpc.lumingraphics.render.scheduler.Render2DBounds;
 import com.github.slmpc.lumingraphics.render.scheduler.Render2DScheduler;
-import com.github.slmpc.lumingraphics.text.TextBatchSink;
-import com.github.slmpc.lumingraphics.text.TextDraw;
-import com.github.slmpc.lumingraphics.ui.UiResourceResolver;
+import com.github.slmpc.lumingraphics.text.render.TextBatchSink;
+import com.github.slmpc.lumingraphics.text.render.TextDraw;
+import com.github.slmpc.lumingraphics.ui.resource.UiResourceResolver;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -47,3 +47,4 @@ public final class SchedulerTextBatchSink implements TextBatchSink {
         }
     }
 }
+

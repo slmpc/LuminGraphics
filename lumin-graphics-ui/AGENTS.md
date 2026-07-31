@@ -9,10 +9,17 @@ renderer/batching bridge over the text module.
 
 | Area | Location |
 | --- | --- |
-| Tree and nodes | `src/main/java/.../ui/UiTree.java`, `UiNode.java` |
-| Viewport/theme | `src/main/java/.../ui/UiViewport.java`, `UiTheme.java` |
-| Controls/widgets | `src/main/java/.../ui/control/`, `widget/` |
-| State and scenes | `src/main/java/.../ui/state/`, `scene/` |
+| Animation | `src/main/java/.../ui/animation/UiAnimation.java` |
+| Controls | `src/main/java/.../ui/control/`, `UiScrollBar.java` |
+| Geometry | `src/main/java/.../ui/geometry/UiRect.java`, `Insets.java` |
+| Layout | `src/main/java/.../ui/layout/`, `LinearScope.java` |
+| Container nodes | `src/main/java/.../ui/node/container/`, `Layer.java`, `Scissor.java` |
+| Primitive nodes | `src/main/java/.../ui/node/primitive/`, `Rect.java`, `Text.java` |
+| Tree and nodes | `src/main/java/.../ui/tree/UiTree.java`, `UiNode.java` |
+| Viewport/theme | `src/main/java/.../ui/viewport/Viewport.java`, `.../ui/theme/UiTheme.java` |
+| Resource resolution | `src/main/java/.../ui/resource/UiResourceResolver.java` |
+| State and scenes | `src/main/java/.../ui/state/UiInvalidationState.java`, `.../ui/scene/UiScene.java` |
+| Text metrics | `src/main/java/.../ui/text/UiTextMetrics.java` |
 | Rendering | `src/main/java/.../ui/render/LuminUiRenderer.java`, `UiRenderBatch.java`, `UiContentBuffer.java` |
 
 ## Tests

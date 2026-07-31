@@ -1,6 +1,6 @@
 package com.github.slmpc.lumingraphics.ui.control;
-import com.github.slmpc.lumingraphics.ui.UiRect;
-import com.github.slmpc.lumingraphics.ui.UiTheme;
+import com.github.slmpc.lumingraphics.ui.geometry.UiRect;
+import com.github.slmpc.lumingraphics.ui.theme.UiTheme;
 import java.util.Objects;
 import java.util.function.LongSupplier;
 public final class UiScrollBar {
@@ -18,3 +18,4 @@ public final class UiScrollBar {
     public static float scrollFromThumbTopY(float top,UiRect viewport,float maxScroll,float contentHeight){Geometry g=computeGeometry(viewport,0,maxScroll,contentHeight);if(g==null)return 0;float travel=g.trackHeight-g.thumbHeight;if(travel<=0)return 0;return Math.max(0,Math.min(1,(top-g.trackY)/travel))*maxScroll;}
     public record Geometry(float thumbX,float thumbY,float thumbWidth,float thumbHeight,float trackX,float trackY,float trackWidth,float trackHeight){public boolean thumbContains(double x,double y){return x>=trackX&&x<=trackX+trackWidth&&y>=thumbY&&y<=thumbY+thumbHeight;}public boolean trackContains(double x,double y){return x>=trackX&&x<=trackX+trackWidth&&y>=trackY&&y<=trackY+trackHeight;}}
 }
+

@@ -1,11 +1,45 @@
 package com.github.slmpc.lumingraphics.ui.render;
+import com.github.slmpc.lumingraphics.ui.control.AssistChip;
+import com.github.slmpc.lumingraphics.ui.control.Button;
+import com.github.slmpc.lumingraphics.ui.control.ButtonElement;
+import com.github.slmpc.lumingraphics.ui.control.FilledField;
+import com.github.slmpc.lumingraphics.ui.control.IconButton;
+import com.github.slmpc.lumingraphics.ui.control.Input;
+import com.github.slmpc.lumingraphics.ui.control.InputElement;
+import com.github.slmpc.lumingraphics.ui.control.PopupCard;
+import com.github.slmpc.lumingraphics.ui.control.SegmentedControl;
+import com.github.slmpc.lumingraphics.ui.control.Slider;
+import com.github.slmpc.lumingraphics.ui.control.Switch;
+import com.github.slmpc.lumingraphics.ui.geometry.UiRect;
+import com.github.slmpc.lumingraphics.ui.node.container.Layer;
+import com.github.slmpc.lumingraphics.ui.node.container.Layered;
+import com.github.slmpc.lumingraphics.ui.node.container.Scissor;
+import com.github.slmpc.lumingraphics.ui.node.primitive.MarqueeText;
+import com.github.slmpc.lumingraphics.ui.node.primitive.Outline;
+import com.github.slmpc.lumingraphics.ui.node.primitive.Rect;
+import com.github.slmpc.lumingraphics.ui.node.primitive.RectGradient;
+import com.github.slmpc.lumingraphics.ui.node.primitive.RectOutline;
+import com.github.slmpc.lumingraphics.ui.node.primitive.RotatedText;
+import com.github.slmpc.lumingraphics.ui.node.primitive.RotatedTexture;
+import com.github.slmpc.lumingraphics.ui.node.primitive.RoundRect;
+import com.github.slmpc.lumingraphics.ui.node.primitive.RoundRectGradient;
+import com.github.slmpc.lumingraphics.ui.node.primitive.SegmentedShadow;
+import com.github.slmpc.lumingraphics.ui.node.primitive.Shadow;
+import com.github.slmpc.lumingraphics.ui.node.primitive.Text;
+import com.github.slmpc.lumingraphics.ui.node.primitive.Texture;
+import com.github.slmpc.lumingraphics.ui.node.primitive.Triangle;
+import com.github.slmpc.lumingraphics.ui.resource.UiResourceResolver;
+import com.github.slmpc.lumingraphics.ui.theme.UiTheme;
+import com.github.slmpc.lumingraphics.ui.tree.UiMalformedTreeException;
+import com.github.slmpc.lumingraphics.ui.tree.UiNode;
+import com.github.slmpc.lumingraphics.ui.tree.UiTree;
+import com.github.slmpc.lumingraphics.ui.viewport.Viewport;
 
 import com.github.slmpc.lumingraphics.core.geometry.LuminColor;
 import com.github.slmpc.lumingraphics.render.scheduler.Render2DBounds;
 import com.github.slmpc.lumingraphics.render.scheduler.Render2DScheduler;
 import com.github.slmpc.lumingraphics.render.scheduler.Render2DScissor;
-import com.github.slmpc.lumingraphics.text.TextRenderer;
-import com.github.slmpc.lumingraphics.ui.*;
+import com.github.slmpc.lumingraphics.text.render.TextRenderer;
 import java.util.List;
 import java.util.Objects;
 
@@ -59,10 +93,11 @@ public final class LuminUiRenderer {
     private void renderIconButton(IconButton value,Render2DScheduler.LayerHandle target,UiRenderBatch batch){target.addRoundRect(bounds(value.bounds()),value.bounds().height()/2,batch.theme().stateLayer(value.tone(),value.hoverProgress(),32));LuminColor color=batch.theme().lerp(batch.theme().textMuted(),value.tone(),value.hoverProgress());var size=measure(value.label(),value.scale(),null);addText(value.label(),value.bounds().x()+(value.bounds().width()-size.width())/2,value.bounds().y()+(value.bounds().height()-size.height())/2,value.scale(),color,null,target,batch);}
     private void renderSegmentedControl(SegmentedControl value,Render2DScheduler.LayerHandle target,UiRenderBatch batch){UiRect b=value.bounds();UiTheme theme=batch.theme();float radius=theme.controlRadius(),ix=b.x()+1,iy=b.y()+1,iw=b.width()-2,ih=b.height()-2,segment=iw/2,indicatorX=ix+1.5f+segment*value.progress(),indicatorY=iy+1.5f,indicatorW=segment-3,indicatorH=ih-3,labelScale=.52f,labelY=iy+(ih-measure("Mg",labelScale,null).height())/2;target.addRoundRect(bounds(b),radius,theme.outlineSoft());target.addRoundRect(new Render2DBounds(ix,iy,iw,ih),Math.max(radius-1,1),theme.segmentedControlSurface());if(value.hoverProgress()>.01f)target.addRoundRect(new Render2DBounds(ix,iy,iw,ih),Math.max(radius-1,1),theme.stateLayer(theme.textPrimary(),value.hoverProgress(),theme.light()?10:14));target.addRect(new Render2DBounds(ix+segment-.5f,iy+3,1,ih-6),theme.outlineSoft());target.addRoundRect(new Render2DBounds(indicatorX,indicatorY,indicatorW,indicatorH),Math.max(4,radius-2),theme.segmentedControlIndicator());var leading=measure(value.leadingLabel(),labelScale,null);var trailing=measure(value.trailingLabel(),labelScale,null);addText(value.leadingLabel(),ix+(segment-leading.width())/2,labelY,labelScale,theme.lerp(theme.segmentedControlActiveLabel(),theme.segmentedControlInactiveLabel(),value.progress()),null,target,batch);addText(value.trailingLabel(),ix+segment+(segment-trailing.width())/2,labelY,labelScale,theme.lerp(theme.segmentedControlInactiveLabel(),theme.segmentedControlActiveLabel(),value.progress()),null,target,batch);}
     private static void renderSlider(Slider value,Render2DScheduler.LayerHandle target){UiRect b=value.bounds();float handleWidth=Math.max(1,value.handleWidth()),handleX=b.x()+b.width()*value.progress()-handleWidth/2,handleY=b.centerY()-value.handleHeight()/2,width=Math.max(value.activeMinWidth(),b.width()*value.progress()-value.activeEndInset());target.addRoundRect(bounds(b),value.trackRadius(),value.trackColor());if(width>0)target.addRoundRect(new Render2DBounds(b.x(),b.y(),Math.min(b.width(),width),b.height()),value.trackRadius(),1,1,value.trackRadius(),value.activeColor());target.addRoundRect(new Render2DBounds(handleX,handleY,handleWidth,value.handleHeight()),value.handleRadius(),value.handleColor());}
-    private com.github.slmpc.lumingraphics.text.TextMeasurement measure(String value,float scale,String fontId){return text.measure(value,scale,resources.font(fontId));}
+    private com.github.slmpc.lumingraphics.text.layout.TextMeasurement measure(String value,float scale,String fontId){return text.measure(value,scale,resources.font(fontId));}
     private void addText(String value,float x,float y,float scale,LuminColor color,String fontId,Render2DScheduler.LayerHandle target,UiRenderBatch batch){bind(target,batch);text.add(value,x,y,scale,color,resources.font(fontId));drawBound();}
     private static void pushScissor(UiRect clip,Render2DScheduler.LayerHandle target){if(clip.width()<=0||clip.height()<=0)throw new UiMalformedTreeException("scissor is empty");try{target.pushScissor(new Render2DScissor(Math.round(clip.x()),Math.round(clip.y()),Math.round(clip.width()),Math.round(clip.height())));}catch(IllegalArgumentException e){throw new UiMalformedTreeException("nested scissor is malformed");}}
     private void bind(Render2DScheduler.LayerHandle target, UiRenderBatch batch){if(textSink!=null)textSink.bind(target,batch);}
     private void drawBound(){if(textSink!=null)text.draw();}
     private static Render2DBounds bounds(UiRect value){return new Render2DBounds(value.x(),value.y(),value.width(),value.height());}
 }
+

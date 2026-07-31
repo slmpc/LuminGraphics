@@ -1,8 +1,8 @@
 package com.github.slmpc.lumingraphics.render.immediate;
 
 import com.github.slmpc.lumingraphics.core.buffer.LuminRingBuffer;
-import com.github.slmpc.lumingraphics.render.RenderExecution;
-import com.github.slmpc.lumingraphics.render.RenderResources;
+import com.github.slmpc.lumingraphics.render.frame.RenderExecution;
+import com.github.slmpc.lumingraphics.render.resource.RenderResources;
 import com.github.slmpc.lumingraphics.render.scheduler.Render2DTexture;
 import com.github.slmpc.prismrhi.descriptor.RhiDescriptorSet;
 

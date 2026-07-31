@@ -1,5 +1,5 @@
 package com.github.slmpc.lumingraphics.render.renderer;
-import com.github.slmpc.lumingraphics.render.RenderResources;
+import com.github.slmpc.lumingraphics.render.resource.RenderResources;
 import com.github.slmpc.lumingraphics.render.immediate.VertexBatch;
 import com.github.slmpc.lumingraphics.render.scheduler.Render2DCommand;
 public final class ShadowRenderer extends AbstractRenderer<Render2DCommand.Shadow> {

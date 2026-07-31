@@ -1,7 +1,8 @@
 package com.github.slmpc.lumingraphics.ui;
+import com.github.slmpc.lumingraphics.ui.node.primitive.SegmentedShadow;
 
-import com.github.slmpc.lumingraphics.render.RenderExecution;
-import com.github.slmpc.lumingraphics.render.RenderResources;
+import com.github.slmpc.lumingraphics.render.frame.RenderExecution;
+import com.github.slmpc.lumingraphics.render.resource.RenderResources;
 import com.github.slmpc.lumingraphics.render.scheduler.Render2DCommand;
 import com.github.slmpc.lumingraphics.render.scheduler.Render2DTexture;
 import com.github.slmpc.prismrhi.backend.BackendApi;
@@ -34,3 +35,4 @@ final class FakeRhi {
     private static Object defaultValue(Method method){Class<?> type=method.getReturnType();if(!type.isPrimitive())return null;if(type==boolean.class)return false;if(type==long.class)return 0L;if(type==int.class)return 0;return null;}
     @SuppressWarnings("unchecked") private static <T>T proxy(Class<T> type,InvocationHandler handler){return (T)Proxy.newProxyInstance(type.getClassLoader(),new Class<?>[]{type},handler);}
 }
+

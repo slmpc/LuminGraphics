@@ -1,4 +1,4 @@
-# LuminGraphics 0.1.0
+# LuminGraphics 1.0.0
 
 LuminGraphics is a Java 17 graphics library stack over PrismRHI. Its published
 modules are `lumin-graphics-core`, `lumin-graphics-render`,

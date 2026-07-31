@@ -23,14 +23,13 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class PackageTopologyMigrationTest {
-    private static final Stage STAGE = Stage.BASELINE;
+    private static final Stage STAGE = Stage.FINAL;
     private static final String PREFIX = "com.github.slmpc.lumingraphics.";
     private static final List<String> MODULES = List.of(
             "lumin-graphics-core", "lumin-graphics-render", "lumin-graphics-text", "lumin-graphics-ui");
     private static final Pattern PROJECT_VERSION = Pattern.compile("(?m)^version = \"([^\"]+)\"$");
     private static final Pattern PACKAGE_DECLARATION = Pattern.compile("(?m)^package\\s+([\\w.]+)\\s*;");
     private static final List<Move> MOVES = moves();
-    private static final String FIRST_NEW_FQN = MOVES.get(0).newFqn();
     private static final String FIRST_RETIRED_FQN = MOVES.get(0).oldFqn();
 
     @Test
@@ -39,12 +38,14 @@ class PackageTopologyMigrationTest {
         if (STAGE == Stage.BASELINE) {
             AssertionError topologyError = assertThrows(AssertionError.class,
                     () -> evaluateFinalTopology(repository));
-            assertTrue(topologyError.getMessage().contains(FIRST_NEW_FQN), topologyError::getMessage);
-            assertTrue(topologyError.getMessage().contains(FIRST_RETIRED_FQN), topologyError::getMessage);
+            String firstMissingNewFqn = firstMissingNewFqn(repository);
+            String firstRetainedOldFqn = firstRetainedOldFqn(repository);
+            assertTrue(topologyError.getMessage().contains(firstMissingNewFqn), topologyError::getMessage);
+            assertTrue(topologyError.getMessage().contains(firstRetainedOldFqn), topologyError::getMessage);
 
             AssertionError compilerError = assertThrows(AssertionError.class,
                     () -> compileCleanConsumer(repository));
-            assertTrue(compilerError.getMessage().contains(FIRST_NEW_FQN), compilerError::getMessage);
+            assertTrue(compilerError.getMessage().contains(firstMissingNewFqn), compilerError::getMessage);
             System.out.println("PACKAGE_TOPOLOGY_STAGE=BASELINE");
             System.out.println("PACKAGE_TOPOLOGY_REJECTION=" + singleLine(topologyError.getMessage()));
             System.out.println("PACKAGE_CONSUMER_REJECTION=" + singleLine(compilerError.getMessage()));
@@ -70,6 +71,24 @@ class PackageTopologyMigrationTest {
 
     private static void evaluateFinalTopology(Path repository) throws IOException {
         evaluateInventories(sourceFqns(repository), jarFqns(publishedJars(repository)));
+    }
+
+    private static String firstMissingNewFqn(Path repository) throws IOException {
+        Set<String> sourceFqns = sourceFqns(repository);
+        return MOVES.stream()
+                .map(Move::newFqn)
+                .filter(fqn -> !sourceFqns.contains(fqn))
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("baseline requires at least one missing new FQN"));
+    }
+
+    private static String firstRetainedOldFqn(Path repository) throws IOException {
+        Set<String> sourceFqns = sourceFqns(repository);
+        return MOVES.stream()
+                .map(Move::oldFqn)
+                .filter(sourceFqns::contains)
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("baseline requires at least one retained legacy FQN"));
     }
 
     private static void evaluateInventories(Set<String> sourceFqns, Set<String> jarFqns) {

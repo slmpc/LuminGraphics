@@ -1,9 +1,9 @@
 package com.github.slmpc.lumingraphics.ui.scene;
 
-import com.github.slmpc.lumingraphics.render.RenderExecution;
+import com.github.slmpc.lumingraphics.render.frame.RenderExecution;
 import com.github.slmpc.lumingraphics.render.scheduler.Render2DScheduler;
-import com.github.slmpc.lumingraphics.ui.UiTheme;
-import com.github.slmpc.lumingraphics.ui.UiTree;
+import com.github.slmpc.lumingraphics.ui.theme.UiTheme;
+import com.github.slmpc.lumingraphics.ui.tree.UiTree;
 import com.github.slmpc.lumingraphics.ui.render.LuminUiRenderer;
 import com.github.slmpc.lumingraphics.ui.render.UiRenderBatch;
 import java.util.ArrayList;
@@ -39,3 +39,4 @@ public final class UiScene implements AutoCloseable {
     @Override public void close(){if(closed)return;RuntimeException failure=null;if(lifecycle.active())try{abortFrame();}catch(RuntimeException error){failure=error;}closed=true;try{scheduler.close();}catch(RuntimeException error){failure=merge(failure,error);}try{renderer.textRenderer().close();}catch(RuntimeException error){failure=merge(failure,error);}if(failure!=null)throw failure;}
     public static final class Lifecycle { private boolean active; public void begin(){if(active)throw new IllegalStateException("frame already active");active=true;} public void end(){if(!active)throw new IllegalStateException("frame is not active");active=false;} public void abort(){active=false;} public boolean active(){return active;} }
 }
+

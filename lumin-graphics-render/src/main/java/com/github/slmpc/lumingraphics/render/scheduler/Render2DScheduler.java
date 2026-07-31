@@ -1,7 +1,7 @@
 package com.github.slmpc.lumingraphics.render.scheduler;
 
 import com.github.slmpc.lumingraphics.core.geometry.LuminColor;
-import com.github.slmpc.lumingraphics.render.RenderExecution;
+import com.github.slmpc.lumingraphics.render.frame.RenderExecution;
 import com.github.slmpc.lumingraphics.render.renderer.RendererSet;
 
 import java.util.ArrayDeque;

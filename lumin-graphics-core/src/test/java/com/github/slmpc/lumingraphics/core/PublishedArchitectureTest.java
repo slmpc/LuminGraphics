@@ -71,7 +71,7 @@ class PublishedArchitectureTest {
         int classEntries = 0;
         Set<String> namespaces = new HashSet<>();
         for (String module : List.of("lumin-graphics-core", "lumin-graphics-render", "lumin-graphics-text", "lumin-graphics-ui")) {
-            Path jar = repository.resolve(module).resolve("build/libs/" + module + "-0.1.0.jar");
+            Path jar = repository.resolve(module).resolve("build/libs/" + module + "-1.0.0.jar");
             assertTrue(Files.isRegularFile(jar), "missing published JAR: " + jar);
             try (JarFile archive = new JarFile(jar.toFile())) {
                 var entries = archive.entries();

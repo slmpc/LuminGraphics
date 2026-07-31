@@ -55,10 +55,10 @@ class MigrationManifestTest {
         }
         assertTrue(rows.stream().noneMatch(row -> row.get("target_public_symbol").contains("com.github.epsilon")),
                 "Compatibility symbols in the com.github.epsilon namespace are forbidden");
-        assertEquals("com.github.slmpc.lumingraphics.text.FontRegistry",
+        assertEquals("com.github.slmpc.lumingraphics.text.font.FontRegistry",
                 rows.stream().filter(row -> row.get("source").equals("graphics/text/StaticFontLoader.java"))
                         .findFirst().orElseThrow().get("target_public_symbol"));
-        assertEquals("com.github.slmpc.lumingraphics.core.RenderContext",
+        assertEquals("com.github.slmpc.lumingraphics.core.context.RenderContext",
                 rows.stream().filter(row -> row.get("source").equals("graphics/LuminRenderSystem.java"))
                         .findFirst().orElseThrow().get("target_public_symbol"));
 

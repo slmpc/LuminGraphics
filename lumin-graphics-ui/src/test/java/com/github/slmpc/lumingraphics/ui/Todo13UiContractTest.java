@@ -1,4 +1,44 @@
 package com.github.slmpc.lumingraphics.ui;
+import com.github.slmpc.lumingraphics.ui.animation.UiAnimation;
+import com.github.slmpc.lumingraphics.ui.control.AssistChip;
+import com.github.slmpc.lumingraphics.ui.control.Button;
+import com.github.slmpc.lumingraphics.ui.control.ButtonElement;
+import com.github.slmpc.lumingraphics.ui.control.FilledField;
+import com.github.slmpc.lumingraphics.ui.control.IconButton;
+import com.github.slmpc.lumingraphics.ui.control.Input;
+import com.github.slmpc.lumingraphics.ui.control.InputElement;
+import com.github.slmpc.lumingraphics.ui.control.PopupCard;
+import com.github.slmpc.lumingraphics.ui.control.SegmentedControl;
+import com.github.slmpc.lumingraphics.ui.control.Slider;
+import com.github.slmpc.lumingraphics.ui.control.Switch;
+import com.github.slmpc.lumingraphics.ui.control.SwitchElement;
+import com.github.slmpc.lumingraphics.ui.geometry.UiRect;
+import com.github.slmpc.lumingraphics.ui.node.container.Layer;
+import com.github.slmpc.lumingraphics.ui.node.container.Layered;
+import com.github.slmpc.lumingraphics.ui.node.container.Scissor;
+import com.github.slmpc.lumingraphics.ui.node.primitive.MarqueeText;
+import com.github.slmpc.lumingraphics.ui.node.primitive.Outline;
+import com.github.slmpc.lumingraphics.ui.node.primitive.Rect;
+import com.github.slmpc.lumingraphics.ui.node.primitive.RectGradient;
+import com.github.slmpc.lumingraphics.ui.node.primitive.RectOutline;
+import com.github.slmpc.lumingraphics.ui.node.primitive.RotatedText;
+import com.github.slmpc.lumingraphics.ui.node.primitive.RotatedTexture;
+import com.github.slmpc.lumingraphics.ui.node.primitive.RoundRect;
+import com.github.slmpc.lumingraphics.ui.node.primitive.RoundRectGradient;
+import com.github.slmpc.lumingraphics.ui.node.primitive.SegmentedShadow;
+import com.github.slmpc.lumingraphics.ui.node.primitive.Shadow;
+import com.github.slmpc.lumingraphics.ui.node.primitive.Text;
+import com.github.slmpc.lumingraphics.ui.node.primitive.Texture;
+import com.github.slmpc.lumingraphics.ui.node.primitive.Triangle;
+import com.github.slmpc.lumingraphics.ui.resource.UiResourceNotFoundException;
+import com.github.slmpc.lumingraphics.ui.resource.UiResourceResolver;
+import com.github.slmpc.lumingraphics.ui.text.UiTextMetrics;
+import com.github.slmpc.lumingraphics.ui.theme.UiTheme;
+import com.github.slmpc.lumingraphics.ui.tree.UiMalformedTreeException;
+import com.github.slmpc.lumingraphics.ui.tree.UiNode;
+import com.github.slmpc.lumingraphics.ui.tree.UiTree;
+import com.github.slmpc.lumingraphics.ui.viewport.UiViewportTarget;
+import com.github.slmpc.lumingraphics.ui.viewport.Viewport;
 
 import com.github.slmpc.lumingraphics.core.geometry.LuminColor;
 import com.github.slmpc.lumingraphics.ui.control.UiScrollBar;
@@ -12,16 +52,16 @@ import com.github.slmpc.lumingraphics.ui.render.UiContentBuffer;
 import com.github.slmpc.lumingraphics.ui.render.UiRenderBatch;
 import com.github.slmpc.lumingraphics.render.renderer.RendererSet;
 import com.github.slmpc.lumingraphics.render.scheduler.Render2DScheduler;
-import com.github.slmpc.lumingraphics.text.TextLayout;
-import com.github.slmpc.lumingraphics.text.TextDraw;
-import com.github.slmpc.lumingraphics.text.TextRenderBatch;
-import com.github.slmpc.lumingraphics.text.TtfGlyph;
-import com.github.slmpc.lumingraphics.text.TtfGlyphAtlas;
-import com.github.slmpc.lumingraphics.text.GlyphAtlasUpload;
-import com.github.slmpc.lumingraphics.text.GlyphPlacement;
-import com.github.slmpc.lumingraphics.text.TextMeasurement;
-import com.github.slmpc.lumingraphics.text.TextRenderer;
-import com.github.slmpc.lumingraphics.text.TtfFontLoader;
+import com.github.slmpc.lumingraphics.text.layout.TextLayout;
+import com.github.slmpc.lumingraphics.text.render.TextDraw;
+import com.github.slmpc.lumingraphics.text.layout.TextRenderBatch;
+import com.github.slmpc.lumingraphics.text.ttf.TtfGlyph;
+import com.github.slmpc.lumingraphics.text.atlas.TtfGlyphAtlas;
+import com.github.slmpc.lumingraphics.text.atlas.GlyphAtlasUpload;
+import com.github.slmpc.lumingraphics.text.layout.GlyphPlacement;
+import com.github.slmpc.lumingraphics.text.layout.TextMeasurement;
+import com.github.slmpc.lumingraphics.text.render.TextRenderer;
+import com.github.slmpc.lumingraphics.text.atlas.TtfFontLoader;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
@@ -414,7 +454,7 @@ final class Todo13UiContractTest {
         private final AtomicInteger closes=new AtomicInteger();
         private final RuntimeException firstCloseFailure;
         private final TtfGlyphAtlas atlas;
-        private com.github.slmpc.lumingraphics.text.GlyphUv uv;
+        private com.github.slmpc.lumingraphics.text.atlas.GlyphUv uv;
 
         TextFixture(){this(null);}
         TextFixture(RuntimeException firstCloseFailure){
@@ -454,3 +494,4 @@ final class Todo13UiContractTest {
         return Arrays.stream(failure.getSuppressed()).map(error -> error.getCause()==null?error.getMessage():error.getCause().getMessage()).toList();
     }
 }
+

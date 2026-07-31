@@ -1,5 +1,8 @@
 package com.github.slmpc.lumingraphics.core;
 
+import com.github.slmpc.lumingraphics.core.context.LuminGraphicsContext;
+import com.github.slmpc.lumingraphics.core.target.RenderTarget;
+import com.github.slmpc.lumingraphics.core.threading.RenderThreadGate;
 import com.github.slmpc.lumingraphics.core.exception.LuminResourceClosedException;
 import com.github.slmpc.lumingraphics.core.exception.LuminThreadException;
 import com.github.slmpc.lumingraphics.core.geometry.SurfaceMetrics;

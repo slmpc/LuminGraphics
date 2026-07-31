@@ -9,10 +9,13 @@ batches, and rendering on top of the render module.
 
 | Area | Location |
 | --- | --- |
-| Fonts | `src/main/java/.../text/FontResource.java`, `FontRegistry.java` |
-| Loading and atlas | `src/main/java/.../text/TtfFontLoader.java`, `GlyphAtlas.java` |
-| Layout | `src/main/java/.../text/TextLayout.java` |
-| Rendering | `src/main/java/.../text/TextRenderer.java`, `TextBatch.java` |
+| Fonts | `src/main/java/.../text/font/FontResource.java`, `FontRegistry.java` |
+| TTF data | `src/main/java/.../text/ttf/TtfFontFile.java`, `TtfGlyph.java` |
+| Loading and atlas | `src/main/java/.../text/atlas/TtfFontLoader.java`, `TtfGlyphAtlas.java` |
+| Layout | `src/main/java/.../text/layout/TextLayout.java`, `TextLayoutEngine.java` |
+| Rendering | `src/main/java/.../text/render/TextRenderer.java`, `TtfTextRenderer.java` |
+| Emoji | `src/main/java/.../text/emoji/SystemEmojiAtlas.java`, `EmojiGlyph.java` |
+| Icons | `src/main/java/.../text/icon/IconChars.java` |
 
 ## Assets And Tests
 

@@ -1,8 +1,8 @@
 package com.github.slmpc.lumingraphics.render.shader;
 
 import com.github.slmpc.lumingraphics.core.geometry.LuminColor;
-import com.github.slmpc.lumingraphics.render.RenderExecution;
-import com.github.slmpc.lumingraphics.render.RenderResources;
+import com.github.slmpc.lumingraphics.render.frame.RenderExecution;
+import com.github.slmpc.lumingraphics.render.resource.RenderResources;
 import com.github.slmpc.lumingraphics.render.immediate.LuminImmediateRenderer;
 import com.github.slmpc.lumingraphics.render.immediate.LuminTessellator;
 import com.github.slmpc.lumingraphics.render.scheduler.Render2DTexture;

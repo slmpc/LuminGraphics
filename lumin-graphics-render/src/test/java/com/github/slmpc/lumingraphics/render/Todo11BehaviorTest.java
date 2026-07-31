@@ -2,6 +2,7 @@ package com.github.slmpc.lumingraphics.render;
 
 import com.github.slmpc.lumingraphics.core.geometry.LuminColor;
 import com.github.slmpc.lumingraphics.core.buffer.LuminRingBuffer;
+import com.github.slmpc.lumingraphics.render.frame.RenderFrame;
 import com.github.slmpc.lumingraphics.render.renderer.RendererSet;
 import com.github.slmpc.lumingraphics.render.scheduler.Render2DBounds;
 import com.github.slmpc.lumingraphics.render.scheduler.Render2DScheduler;
