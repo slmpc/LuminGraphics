@@ -4,6 +4,7 @@ import com.github.slmpc.lumingraphics.core.geometry.LuminColor;
 import com.github.slmpc.lumingraphics.core.buffer.LuminRingBuffer;
 import com.github.slmpc.lumingraphics.render.frame.RenderFrame;
 import com.github.slmpc.lumingraphics.render.renderer.RendererSet;
+import com.github.slmpc.lumingraphics.render.scheduler.GlyphQuad;
 import com.github.slmpc.lumingraphics.render.scheduler.Render2DBounds;
 import com.github.slmpc.lumingraphics.render.scheduler.Render2DScheduler;
 import com.github.slmpc.lumingraphics.render.scheduler.Render2DScissor;
@@ -98,6 +99,68 @@ class Todo11BehaviorTest {
         assertEquals(List.of(2.0f, 8.0f, 14.0f), fake.writes().subList(0, 3).stream()
                 .map(bytes -> ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN).getFloat()).toList());
         assertEquals(1, fake.trace().stream().filter("scissor=1,2,30,20"::equals).count());
+        scheduler.close();
+    }
+
+    @Test
+    void schedulerBatchesReadyCommandsByPipelineWithoutCrossingOverlaps() {
+        FakeRhi fake = new FakeRhi();
+        Render2DScheduler scheduler = new Render2DScheduler(RendererSet.create(fake.resources(), 4096), 8);
+        LuminColor white = new LuminColor(1, 1, 1, 1);
+        Render2DTexture atlas = new Render2DTexture.Resource("atlas");
+        var layer = scheduler.layer(0);
+        Render2DBounds first = new Render2DBounds(0, 0, 4, 4);
+        Render2DBounds second = new Render2DBounds(10, 0, 4, 4);
+
+        layer.addRect(first, white);
+        layer.addGlyphs(first, atlas, List.of(new GlyphQuad(first, 0, 0, 1, 1, white)));
+        layer.addRect(second, white);
+        layer.addGlyphs(second, atlas, List.of(new GlyphQuad(second, 0, 0, 1, 1, white)));
+        scheduler.flush(fake.execution(1, 0, 20, 10));
+
+        assertEquals(List.of("rectangle", "ttf-font-aa"), fake.boundPipelines());
+        assertEquals(List.of("draw=12", "draw=12"),
+                fake.trace().stream().filter(line -> line.startsWith("draw=")).toList());
+        scheduler.close();
+    }
+
+    @Test
+    void schedulerUsesExplicitLayersForOverlappingPainterOrder() {
+        FakeRhi fake = new FakeRhi();
+        Render2DScheduler scheduler = new Render2DScheduler(RendererSet.create(fake.resources(), 4096), 8);
+        LuminColor white = new LuminColor(1, 1, 1, 1);
+        Render2DBounds bounds = new Render2DBounds(0, 0, 4, 4);
+        Render2DTexture atlas = new Render2DTexture.Resource("atlas");
+        scheduler.layer(0).addRect(bounds, white);
+        scheduler.layer(1).addGlyphs(bounds, atlas, List.of(new GlyphQuad(bounds, 0, 0, 1, 1, white)));
+        scheduler.layer(2).addRect(bounds, white);
+        scheduler.layer(3).addGlyphs(bounds, atlas, List.of(new GlyphQuad(bounds, 0, 0, 1, 1, white)));
+        scheduler.flush(fake.execution(1, 0, 10, 10));
+
+        assertEquals(List.of("rectangle", "ttf-font-aa", "rectangle", "ttf-font-aa"),
+                fake.boundPipelines());
+        scheduler.close();
+    }
+
+    @Test
+    void schedulerKeepsGlyphAtlasTexturesAsSeparateBatches() {
+        FakeRhi fake = new FakeRhi();
+        Render2DScheduler scheduler = new Render2DScheduler(RendererSet.create(fake.resources(), 4096), 2);
+        LuminColor white = new LuminColor(1, 1, 1, 1);
+        Render2DTexture firstAtlas = new Render2DTexture.Resource("atlas-1");
+        Render2DTexture secondAtlas = new Render2DTexture.Resource("atlas-2");
+        var layer = scheduler.layer(0);
+
+        for (int index = 0; index < 3; index++) {
+            Render2DBounds bounds = new Render2DBounds(index * 5, 0, 4, 4);
+            Render2DTexture atlas = index == 1 ? secondAtlas : firstAtlas;
+            layer.addGlyphs(bounds, atlas, List.of(new GlyphQuad(bounds, 0, 0, 1, 1, white)));
+        }
+        scheduler.flush(fake.execution(1, 0, 20, 10));
+
+        assertEquals(List.of("ttf-font-aa", "ttf-font-aa"), fake.boundPipelines());
+        assertEquals(List.of("descriptor=atlas-1", "descriptor=atlas-2"),
+                fake.trace().stream().filter(line -> line.startsWith("descriptor=atlas-")).toList());
         scheduler.close();
     }
 

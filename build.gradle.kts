@@ -14,7 +14,7 @@ plugins {
 }
 
 group = "com.github.slmpc.lumingraphics"
-version = "1.1.0-SNAPSHOT"
+version = "1.1.0"
 
 val prismGroup = "com.github.slmpc.prismrhi"
 val prismVersion = "0.1.1-SNAPSHOT"
@@ -118,7 +118,7 @@ tasks.register("verifyTopology") {
         }
         check(gradle.includedBuilds.isEmpty()) { "Composite builds are forbidden" }
         check(rootProject.group.toString() == "com.github.slmpc.lumingraphics")
-        check(rootProject.version.toString() == "1.1.0-SNAPSHOT")
+        check(rootProject.version.toString() == "1.1.0")
 
         luminPublishedJavaModules.forEach { moduleName ->
             val module = project(":$moduleName")

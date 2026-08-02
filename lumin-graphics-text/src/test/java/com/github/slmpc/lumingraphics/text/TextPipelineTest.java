@@ -162,6 +162,25 @@ class TextPipelineTest {
     }
 
     @Test
+    void layoutsEveryGlyphAcrossMultipleAtlasPagesWithoutMergingUploads() {
+        CountingUploader uploader = new CountingUploader();
+        String text = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        try (TtfFontLoader loader = new TtfFontLoader(FONT, 48, 4, 96, 96, 32,
+                uploader, Runnable::run)) {
+            TextLayout layout = new TextLayoutEngine().layout(text, 0, 0, 1.0f, loader);
+
+            assertEquals(text.length(), layout.glyphCount());
+            assertTrue(layout.batches().size() > 1, "fixture must overflow the first atlas page");
+            assertEquals(layout.batches().size(), layout.batches().stream()
+                    .map(TextRenderBatch::upload).distinct().count(),
+                    "each atlas page must retain its own upload batch");
+            assertEquals(text.length(), layout.batches().stream().mapToInt(TextRenderBatch::glyphCount).sum());
+            closeBatches(layout);
+        }
+        assertEquals(uploader.uploads.get(), uploader.closed.get());
+    }
+
+    @Test
     void stableLayoutsReuseImmutableCacheDataAndRevisionChangesInvalidateOnlyAffectedFont() {
         CountingUploader firstUploader = new CountingUploader();
         CountingUploader otherUploader = new CountingUploader();

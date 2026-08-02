@@ -22,7 +22,7 @@
 
 ## Render：命令与 shader
 
-`Render2DScheduler` 收集按 layer 排序的 2D 命令，renderer 在一个已开始的 `RenderFrame` 内消费命令。`LuminPipelineCatalog.entries()` 是稳定的管线描述表；不要根据文件名手写重复的 shader 路径。
+`Render2DScheduler` 收集按 layer 排序的 2D 命令，renderer 在一个已开始的 `RenderFrame` 内消费命令。规划器先在每个手动 layer 内按 pipeline、scissor 和采样纹理聚合命令，再只为数量较少的批次组建立遮挡依赖；规划成本因此取决于批次组数，而不是图元数。同一 layer 优先合批，必须精确保序的前景与背景应放入不同 layer；不同 layer 中互不相交的 Panel、背景和文字仍可跨层重排并合批。纹理、字体 Atlas 和 scissor 都属于精确批次键，不会跨资源误合并。`LuminPipelineCatalog.entries()` 是稳定的管线描述表；不要根据文件名手写重复的 shader 路径。
 
 构建 Vulkan shader 资源：
 

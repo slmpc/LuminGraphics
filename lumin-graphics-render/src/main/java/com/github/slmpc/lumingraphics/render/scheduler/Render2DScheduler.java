@@ -6,7 +6,6 @@ import com.github.slmpc.lumingraphics.render.renderer.RendererSet;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -15,8 +14,6 @@ import java.util.Map;
 import java.util.Objects;
 
 public final class Render2DScheduler implements AutoCloseable {
-    private static final Comparator<Render2DCommand> ORDER = Comparator.comparingInt(Render2DCommand::layer)
-            .thenComparingLong(Render2DCommand::sequence);
     private final RendererSet renderers;
     private final int quadtreeThreshold;
     private final Render2DScissorMapper scissorMapper;
@@ -78,13 +75,7 @@ public final class Render2DScheduler implements AutoCloseable {
 
     private void render(RenderExecution execution, List<Render2DCommand> pending) {
         Render2DBounds viewport = scissorMapper.viewport(execution.width(), execution.height());
-        List<Render2DCommand> ordered = pending.stream().sorted(ORDER).toList();
-        if (ordered.size() >= quadtreeThreshold) {
-            var visible = new Render2DQuadTree(viewport, ordered).query(viewport);
-            ordered = ordered.stream().filter(visible::contains).toList();
-        } else {
-            ordered = ordered.stream().filter(command -> command.bounds().intersects(viewport)).toList();
-        }
+        List<Render2DCommand> ordered = Render2DBatchPlanner.plan(pending, viewport, quadtreeThreshold);
         if (ordered.isEmpty()) return;
         renderers.beginFrame(execution);
         try {

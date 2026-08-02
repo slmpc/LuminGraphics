@@ -14,6 +14,19 @@
 The published direction is one way: `core -> render -> text -> ui`. Keep
 caller-owned graphics context/resource lifetime visible at every boundary.
 
+## Ordered 2D Batching
+
+`Render2DScheduler` treats each integer layer as a strict ordering boundary.
+Within one layer it first collapses compatible commands into exact batch groups.
+Only those groups, rather than every primitive, participate in the painter-order
+dependency graph. Ready groups keep the current exact batch or pipeline when
+possible. The exact key includes scissor and sampled texture, so glyphs from
+different atlas pages never share a draw.
+Callers can use `UiTree.Scope.layer(...)`, layered primitive overloads, or a
+scene-relative layer to express ordering that must remain explicit. Commands in
+one layer are pipeline-batched; use distinct layers for exact foreground and
+background ordering. Non-overlapping groups may still merge across layers.
+
 ## Shaders And Resources
 
 Run `:lumin-graphics-render:compileShaders` to transform retained GLSL under
