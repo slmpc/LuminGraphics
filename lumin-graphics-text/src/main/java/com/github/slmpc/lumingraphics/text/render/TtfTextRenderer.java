@@ -14,17 +14,29 @@ import java.util.Objects;
 public final class TtfTextRenderer implements TextRenderer {
     private final TextLayoutEngine layouts;
     private final TextBatchSink sink;
+    private final float scaleMultiplier;
     private static final LuminColor WHITE = new LuminColor(1, 1, 1, 1);
     private final List<TextDraw> pending = new ArrayList<>();
     private boolean closed;
 
-    public TtfTextRenderer(TextBatchSink sink) { this(new TextLayoutEngine(), sink); }
+    public TtfTextRenderer(TextBatchSink sink) { this(new TextLayoutEngine(), 1.0f, sink); }
+    /** 创建使用指定 UI 基准倍率的文本渲染器；倍率同时作用于测量和字形布局。 */
+    public TtfTextRenderer(float scaleMultiplier, TextBatchSink sink) {
+        this(new TextLayoutEngine(), scaleMultiplier, sink);
+    }
     public TtfTextRenderer(TextLayoutEngine layouts, TextBatchSink sink) {
+        this(layouts, 1.0f, sink);
+    }
+    public TtfTextRenderer(TextLayoutEngine layouts, float scaleMultiplier, TextBatchSink sink) {
         this.layouts = Objects.requireNonNull(layouts, "layouts");
+        if (!Float.isFinite(scaleMultiplier) || scaleMultiplier <= 0.0f) {
+            throw new IllegalArgumentException("scaleMultiplier must be positive and finite");
+        }
+        this.scaleMultiplier = scaleMultiplier;
         this.sink = Objects.requireNonNull(sink, "sink");
     }
     @Override public synchronized TextMeasurement measure(String text, float scale, TtfFontLoader font) {
-        ensureOpen(); return layouts.measure(text, scale, font);
+        ensureOpen(); return layouts.measure(text, effectiveScale(scale), font);
     }
     @Override public synchronized TextLayout add(String text, float x, float y, float scale, TtfFontLoader font) {
         return add(text, x, y, scale, WHITE, font);
@@ -77,9 +89,20 @@ public final class TtfTextRenderer implements TextRenderer {
         Objects.requireNonNull(font, "font");
         validateFinite(x, y, scale, originX, originY, rotationDegrees);
         if (scale <= 0) throw new IllegalArgumentException("scale must be positive");
-        TextLayout layout = layouts.layout(text, x, y, scale, font);
+        TextLayout layout = layouts.layout(text, x, y, effectiveScale(scale), font);
         pending.add(new TextDraw(x, y, scale, color, originX, originY, rotationDegrees, layout));
         return layout;
+    }
+
+    private float effectiveScale(float scale) {
+        if (!Float.isFinite(scale) || scale <= 0.0f) {
+            throw new IllegalArgumentException("scale must be positive and finite");
+        }
+        float effective = scale * scaleMultiplier;
+        if (!Float.isFinite(effective) || effective <= 0.0f) {
+            throw new IllegalArgumentException("effective text scale must be positive and finite");
+        }
+        return effective;
     }
 
     private static void closeDraws(List<TextDraw> draws) {

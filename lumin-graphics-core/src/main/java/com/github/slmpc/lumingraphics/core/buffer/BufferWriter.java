@@ -28,6 +28,15 @@ public final class BufferWriter {
         return this;
     }
 
+    public BufferWriter putRgba8(int value) {
+        require(4);
+        buffer.put((byte) (value >>> 24))
+                .put((byte) (value >>> 16))
+                .put((byte) (value >>> 8))
+                .put((byte) value);
+        return this;
+    }
+
     public int size() {
         return buffer.position();
     }

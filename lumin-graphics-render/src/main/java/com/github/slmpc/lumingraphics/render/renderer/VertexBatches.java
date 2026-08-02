@@ -125,7 +125,7 @@ final class VertexBatches {
                 float u = corner == 0 || corner == 1 ? quad.u0() : quad.u1();
                 float v = corner == 0 || corner == 3 ? quad.v0() : quad.v1();
                 out.putFloat(transformed[corner * 2]).putFloat(transformed[corner * 2 + 1]).putFloat(0);
-                out.putFloat(u).putFloat(v).putInt(quad.color().toRgba8());
+                out.putFloat(u).putFloat(v).putRgba8(quad.color().toRgba8());
             }
         }
         return new VertexBatch(out.bytes(), quads.size() * 6, 24);
@@ -149,7 +149,7 @@ final class VertexBatches {
     }
 
     private static void positionColor(BufferWriter out, float x, float y, float z, LuminColor color) {
-        out.putFloat(x).putFloat(y).putFloat(z).putInt(color.toRgba8());
+        out.putFloat(x).putFloat(y).putFloat(z).putRgba8(color.toRgba8());
     }
 
     private static void innerRect(BufferWriter out, Render2DBounds bounds) {

@@ -15,7 +15,7 @@ public final class LuminTessellator {
 
     public LuminTessellator vertex(float x, float y, float z, LuminColor color) {
         if (color == null) throw new IllegalArgumentException("vertex color must not be null");
-        writer.putFloat(x).putFloat(y).putFloat(z).putInt(color.toRgba8());
+        writer.putFloat(x).putFloat(y).putFloat(z).putRgba8(color.toRgba8());
         vertices++;
         return this;
     }

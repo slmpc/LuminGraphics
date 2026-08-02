@@ -27,6 +27,16 @@ class AdvancedPrimitiveTest {
     private static final Render2DBounds BOUNDS = new Render2DBounds(10, 20, 30, 40);
 
     @Test
+    void vertexColorsAreEmittedAsRgbaBytesForUnormAttributes() {
+        LuminColor color = new LuminColor(0x12 / 255.0f, 0x34 / 255.0f, 0x56 / 255.0f, 0x78 / 255.0f);
+        byte[] vertex = render(layer -> layer.addRect(new Render2DBounds(1, 2, 3, 4), color)).writes().get(0);
+
+        assertArrayEquals(new byte[]{0x12, 0x34, 0x56, 0x78}, new byte[]{
+                vertex[12], vertex[13], vertex[14], vertex[15]
+        });
+    }
+
+    @Test
     void gradientsAndPerCornerRadiiReachExactVertexAttributes() {
         byte[] rect = render(layer -> layer.addRectGradient(BOUNDS, TL, BL, BR, TR)).writes().get(0);
         assertVertex(rect, 16, 0, 10, 20, TL, 0);
@@ -38,7 +48,7 @@ class AdvancedPrimitiveTest {
                 TL, BL, BR, TR)).writes().get(0);
         assertVertex(round, 48, 0, 10, 20, TL, 0);
         assertFloatTuple(round, 32, 1, 2, 3, 4);
-        assertEquals(BL.toRgba8(), buffer(round).getInt(48 + 12));
+        assertRgba8(buffer(round), 48 + 12, BL);
 
         byte[] outline = render(layer -> layer.addOutline(BOUNDS, 4, 3, 2, 1, 1.5f, TL)).writes().get(0);
         assertFloatTuple(outline, 32, 4, 3, 2, 1);
@@ -227,7 +237,7 @@ class AdvancedPrimitiveTest {
         assertEquals(x, buffer.getFloat(offset));
         assertEquals(y, buffer.getFloat(offset + 4));
         assertEquals(z, buffer.getFloat(offset + 8));
-        assertEquals(color.toRgba8(), buffer.getInt(offset + 12));
+        assertRgba8(buffer, offset + 12, color);
     }
 
     private static void assertFloatTuple(byte[] bytes, int offset, float... expected) {
@@ -244,7 +254,15 @@ class AdvancedPrimitiveTest {
         assertEquals(0, buffer.getFloat(offset + 8));
         assertEquals(u, buffer.getFloat(offset + 12));
         assertEquals(v, buffer.getFloat(offset + 16));
-        assertEquals(color.toRgba8(), buffer.getInt(offset + 20));
+        assertRgba8(buffer, offset + 20, color);
+    }
+
+    private static void assertRgba8(ByteBuffer buffer, int offset, LuminColor color) {
+        int rgba = color.toRgba8();
+        assertEquals((byte) (rgba >>> 24), buffer.get(offset));
+        assertEquals((byte) (rgba >>> 16), buffer.get(offset + 1));
+        assertEquals((byte) (rgba >>> 8), buffer.get(offset + 2));
+        assertEquals((byte) rgba, buffer.get(offset + 3));
     }
 
     private static ByteBuffer buffer(byte[] bytes) {

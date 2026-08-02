@@ -9,6 +9,7 @@ import com.github.slmpc.lumingraphics.text.atlas.TtfFontLoader;
 import com.github.slmpc.lumingraphics.text.atlas.TtfGlyphAtlas;
 import com.github.slmpc.lumingraphics.text.layout.GlyphPlacement;
 import com.github.slmpc.lumingraphics.text.layout.TextLayout;
+import com.github.slmpc.lumingraphics.text.layout.TextMeasurement;
 import com.github.slmpc.lumingraphics.text.layout.TextRenderBatch;
 import com.github.slmpc.lumingraphics.text.render.TextDraw;
 import com.github.slmpc.lumingraphics.text.render.TtfTextRenderer;
@@ -23,6 +24,20 @@ import org.junit.jupiter.api.Test;
 
 class TextDrawContractTest {
     private static final FontResource FONT = TestFonts.resource("font.ttf");
+
+    @Test
+    void configuredScaleMultiplierPreservesLegacyUiTextSize() {
+        CountingUploader uploader = new CountingUploader();
+        try (TtfFontLoader font = font(uploader);
+             TtfTextRenderer renderer = new TtfTextRenderer(0.35f, ignored -> { })) {
+            TextMeasurement measurement = renderer.measure("Mg", 1.0f, font);
+            assertEquals(font.metrics().lineHeight() * 0.35f, measurement.height(), 0.0001f);
+
+            TextLayout layout = renderer.add("A", 0.0f, 0.0f, 1.0f, font);
+            assertEquals(font.advance('A') * 0.35f, layout.width(), 0.0001f);
+        }
+        assertEquals(uploader.uploads.get(), uploader.closes.get());
+    }
 
     @Test
     void styledAndRotatedDrawsReachSinkExactlyInAddOrder() {

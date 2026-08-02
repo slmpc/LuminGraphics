@@ -19,7 +19,7 @@ import java.util.HexFormat;
 import java.util.List;
 
 public final class ShaderCompilerTool {
-    static final String COMPILER_ID = "com.github.slmpc.prismrhi:prism-rhi-shaderc:0.1.0";
+    static final String COMPILER_ID = "com.github.slmpc.prismrhi:prism-rhi-shaderc:0.1.1-SNAPSHOT";
     static final String TARGET_ID = "vulkan1.3-spirv1.6-opt-none-LUMIN_VULKAN=1";
 
     private ShaderCompilerTool() {
@@ -100,7 +100,7 @@ public final class ShaderCompilerTool {
         }
         Files.write(outputRoot.resolve("assets/lumin_graphics/shaders/spirv-manifest.csv"), manifest,
                 StandardCharsets.UTF_8);
-        System.out.println("SHADERC PASS count=37 compiler=prism-rhi-shaderc:0.1.0 target=vulkan1.3/spirv1.6");
+        System.out.println("SHADERC PASS count=37 compiler=prism-rhi-shaderc:0.1.1-SNAPSHOT target=vulkan1.3/spirv1.6");
     }
 
     private static void validateSpirv(String source, RhiShaderStage stage, byte[] bytes) {

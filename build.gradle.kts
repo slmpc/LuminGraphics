@@ -17,7 +17,7 @@ group = "com.github.slmpc.lumingraphics"
 version = "1.1.0-SNAPSHOT"
 
 val prismGroup = "com.github.slmpc.prismrhi"
-val prismVersion = "0.1.0"
+val prismVersion = "0.1.1-SNAPSHOT"
 extra["prismGroup"] = prismGroup
 extra["prismVersion"] = prismVersion
 val luminPublishedJavaModules = listOf(

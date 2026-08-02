@@ -19,6 +19,7 @@ public final class Render2DScheduler implements AutoCloseable {
             .thenComparingLong(Render2DCommand::sequence);
     private final RendererSet renderers;
     private final int quadtreeThreshold;
+    private final Render2DScissorMapper scissorMapper;
     private final List<Render2DCommand> commands = new ArrayList<>();
     private final Map<Integer, LayerHandle> layers = new HashMap<>();
     private final java.util.Set<Long> flushedSequences = new HashSet<>();
@@ -26,9 +27,16 @@ public final class Render2DScheduler implements AutoCloseable {
     private boolean closed;
 
     public Render2DScheduler(RendererSet renderers, int quadtreeThreshold) {
-        if (renderers == null || quadtreeThreshold <= 0) throw new IllegalArgumentException("scheduler inputs are invalid");
+        this(renderers, quadtreeThreshold, Render2DScissorMapper.identity());
+    }
+
+    public Render2DScheduler(RendererSet renderers, int quadtreeThreshold, Render2DScissorMapper scissorMapper) {
+        if (renderers == null || quadtreeThreshold <= 0 || scissorMapper == null) {
+            throw new IllegalArgumentException("scheduler inputs are invalid");
+        }
         this.renderers = renderers;
         this.quadtreeThreshold = quadtreeThreshold;
+        this.scissorMapper = scissorMapper;
     }
     public LayerHandle layer(int layer) { requireOpen(); return layers.computeIfAbsent(layer, key -> new LayerHandle(key)); }
     public boolean isEmpty() { return commands.isEmpty(); }
@@ -69,7 +77,7 @@ public final class Render2DScheduler implements AutoCloseable {
     }
 
     private void render(RenderExecution execution, List<Render2DCommand> pending) {
-        Render2DBounds viewport = new Render2DBounds(0, 0, execution.width(), execution.height());
+        Render2DBounds viewport = scissorMapper.viewport(execution.width(), execution.height());
         List<Render2DCommand> ordered = pending.stream().sorted(ORDER).toList();
         if (ordered.size() >= quadtreeThreshold) {
             var visible = new Render2DQuadTree(viewport, ordered).query(viewport);
@@ -85,8 +93,13 @@ public final class Render2DScheduler implements AutoCloseable {
                 int end = start + 1;
                 while (end < ordered.size() && batchCompatible(command, ordered.get(end))) end++;
                 Render2DScissor framebuffer = new Render2DScissor(0, 0, execution.width(), execution.height());
-                Render2DScissor effectiveScissor = command.scissor() == null
-                        ? framebuffer : intersection(framebuffer, command.scissor());
+                Render2DScissor mappedScissor = command.scissor() == null
+                        ? framebuffer : scissorMapper.toFramebuffer(command.scissor(), execution.width(), execution.height());
+                if (mappedScissor == null) {
+                    start = end;
+                    continue;
+                }
+                Render2DScissor effectiveScissor = intersection(framebuffer, mappedScissor);
                 if (effectiveScissor == null) {
                     start = end;
                     continue;
