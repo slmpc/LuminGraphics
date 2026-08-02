@@ -30,7 +30,6 @@ import com.github.slmpc.lumingraphics.ui.node.primitive.Texture;
 import com.github.slmpc.lumingraphics.ui.node.primitive.Triangle;
 import com.github.slmpc.lumingraphics.ui.resource.UiResourceResolver;
 import com.github.slmpc.lumingraphics.ui.theme.UiTheme;
-import com.github.slmpc.lumingraphics.ui.tree.UiMalformedTreeException;
 import com.github.slmpc.lumingraphics.ui.tree.UiNode;
 import com.github.slmpc.lumingraphics.ui.tree.UiTree;
 import com.github.slmpc.lumingraphics.ui.viewport.Viewport;
@@ -70,9 +69,10 @@ public final class LuminUiRenderer {
     private void renderNode(UiNode node,UiRenderBatch batch,int layer,UiRect clip){
         if(node instanceof Layer value){renderNodes(value.children(),batch,layer+value.layer(),clip);return;}
         if(node instanceof Layered value){renderNode(value.child(),batch,layer+value.layer(),clip);return;}
-        if(node instanceof Scissor value){UiRect nested=clip==null?value.clip():clip.intersect(value.clip());if(nested==null)throw new UiMalformedTreeException("nested scissors do not intersect");renderNodes(value.children(),batch,layer,nested);return;}
+        if(node instanceof Scissor value){UiRect nested=clip==null?value.clip():clip.intersect(value.clip());if(nested!=null)renderNodes(value.children(),batch,layer,nested);return;}
         Render2DScheduler.LayerHandle target=batch.absoluteLayer(layer);
-        boolean clipped=clip!=null;if(clipped)pushScissor(clip,target);
+        if(clip!=null&&!pushScissor(clip,target))return;
+        boolean clipped=clip!=null;
         try {
         if(node instanceof Shadow value){target.addShadow(bounds(value.bounds()),value.radiusTopLeft(),value.radiusTopRight(),value.radiusBottomRight(),value.radiusBottomLeft(),value.blurRadius(),value.color());return;}
         if(node instanceof SegmentedShadow value){float[] r=value.radii();target.addSegmentedShadow(bounds(value.bounds()),r[0],r[1],r[2],r[3],value.blurRadius(),value.color(),value.segmentRects(),value.segmentRadii(),value.segmentCount());return;}
@@ -84,7 +84,7 @@ public final class LuminUiRenderer {
         if(node instanceof Outline value){target.addOutline(bounds(value.bounds()),value.radiusTopLeft(),value.radiusTopRight(),value.radiusBottomRight(),value.radiusBottomLeft(),value.outlineWidth(),value.color());return;}
         if(node instanceof Text value){bind(target,batch);text.add(value.text(),value.x(),value.y(),value.scale(),value.color(),resources.font(value.fontId()));drawBound();return;}
         if(node instanceof RotatedText value){bind(target,batch);text.addRotated(value.text(),value.x(),value.y(),value.scale(),value.color(),resources.font(value.fontId()),value.originX(),value.originY(),value.rotationDegrees());drawBound();return;}
-        if(node instanceof MarqueeText value){if(clip!=null&&clip.intersect(value.clip())==null)throw new UiMalformedTreeException("marquee clip is outside parent");pushScissor(value.clip(),target);try{bind(target,batch);text.add(value.text(),value.x(),value.y(),value.scale(),value.color(),resources.font(value.fontId()));drawBound();}finally{target.popScissor();}return;}
+        if(node instanceof MarqueeText value){if(clip!=null&&clip.intersect(value.clip())==null)return;if(!pushScissor(value.clip(),target))return;try{bind(target,batch);text.add(value.text(),value.x(),value.y(),value.scale(),value.color(),resources.font(value.fontId()));drawBound();}finally{target.popScissor();}return;}
         if(node instanceof Texture value){target.addRoundedTexture(bounds(value.bounds()),resources.texture(value.textureId()),value.radiusTopLeft(),value.radiusTopRight(),value.radiusBottomRight(),value.radiusBottomLeft(),value.u0(),value.v0(),value.u1(),value.v1(),value.color());return;}
         if(node instanceof RotatedTexture value){target.addRotatedTexture(bounds(value.bounds()),resources.texture(value.textureId()),value.u0(),value.v0(),value.u1(),value.v1(),value.color(),value.originX(),value.originY(),value.rotationDegrees());return;}
         if(node instanceof Button value){renderButton(value.element(),target,batch);return;}
@@ -110,7 +110,7 @@ public final class LuminUiRenderer {
     private static void renderSlider(Slider value,Render2DScheduler.LayerHandle target){UiRect b=value.bounds();float handleWidth=Math.max(1,value.handleWidth()),handleX=b.x()+b.width()*value.progress()-handleWidth/2,handleY=b.centerY()-value.handleHeight()/2,width=Math.max(value.activeMinWidth(),b.width()*value.progress()-value.activeEndInset());target.addRoundRect(bounds(b),value.trackRadius(),value.trackColor());if(width>0)target.addRoundRect(new Render2DBounds(b.x(),b.y(),Math.min(b.width(),width),b.height()),value.trackRadius(),1,1,value.trackRadius(),value.activeColor());target.addRoundRect(new Render2DBounds(handleX,handleY,handleWidth,value.handleHeight()),value.handleRadius(),value.handleColor());}
     private com.github.slmpc.lumingraphics.text.layout.TextMeasurement measure(String value,float scale,String fontId){return text.measure(value,scale,resources.font(fontId));}
     private void addText(String value,float x,float y,float scale,LuminColor color,String fontId,Render2DScheduler.LayerHandle target,UiRenderBatch batch){bind(target,batch);text.add(value,x,y,scale,color,resources.font(fontId));drawBound();}
-    private static void pushScissor(UiRect clip,Render2DScheduler.LayerHandle target){if(clip.width()<=0||clip.height()<=0)throw new UiMalformedTreeException("scissor is empty");try{target.pushScissor(new Render2DScissor(Math.round(clip.x()),Math.round(clip.y()),Math.round(clip.width()),Math.round(clip.height())));}catch(IllegalArgumentException e){throw new UiMalformedTreeException("nested scissor is malformed");}}
+    private static boolean pushScissor(UiRect clip,Render2DScheduler.LayerHandle target){int left=Math.max(0,Math.round(clip.x())),top=Math.max(0,Math.round(clip.y())),right=Math.round(clip.right()),bottom=Math.round(clip.bottom());if(right<=left||bottom<=top)return false;target.pushScissor(new Render2DScissor(left,top,right-left,bottom-top));return true;}
     private void bind(Render2DScheduler.LayerHandle target, UiRenderBatch batch){if(textSink!=null)textSink.bind(target,batch);}
     private void drawBound(){if(textSink!=null)text.draw();}
     private static Render2DBounds bounds(UiRect value){return new Render2DBounds(value.x(),value.y(),value.width(),value.height());}

@@ -2,6 +2,7 @@ package com.github.slmpc.lumingraphics.render.immediate;
 
 import com.github.slmpc.lumingraphics.core.buffer.LuminRingBuffer;
 import com.github.slmpc.lumingraphics.render.frame.RenderExecution;
+import com.github.slmpc.lumingraphics.render.pipeline.LuminPipelineCatalog;
 import com.github.slmpc.lumingraphics.render.resource.RenderResources;
 import com.github.slmpc.lumingraphics.render.scheduler.Render2DTexture;
 import com.github.slmpc.prismrhi.descriptor.RhiDescriptorSet;
@@ -9,9 +10,11 @@ import com.github.slmpc.prismrhi.descriptor.RhiDescriptorSet;
 /** Uploads immediate CPU vertex batches and records explicit Prism draw commands. */
 public final class LuminImmediateRenderer implements AutoCloseable {
     private final LuminRingBuffer ring;
+    private final int bytesPerSlot;
 
     public LuminImmediateRenderer(RenderResources resources, int bytesPerSlot) {
         if (resources == null) throw new IllegalArgumentException("render resources must not be null");
+        this.bytesPerSlot = bytesPerSlot;
         ring = new LuminRingBuffer(resources.device(), bytesPerSlot, 3);
     }
 
@@ -31,13 +34,17 @@ public final class LuminImmediateRenderer implements AutoCloseable {
     private void draw(VertexBatch batch, String pipelineId, Render2DTexture texture,
                       RhiDescriptorSet descriptor, RenderExecution execution) {
         if (!ring.frameActive()) throw new IllegalStateException("immediate renderer frame is not active");
-        var allocation = ring.write(batch.bytes(), 16);
-        var pipeline = execution.resources().requirePipeline(pipelineId);
-        execution.commands().bindGraphicsPipeline(pipeline);
-        if (texture != null) descriptor = execution.resources().requireTextureDescriptor(texture);
-        if (descriptor != null) execution.commands().bindDescriptorSet(pipeline, 0, descriptor);
-        execution.commands().bindVertexBuffer(0, allocation.buffer(), allocation.offset());
-        execution.commands().draw(batch.vertexCount());
+        for (VertexBatch chunk : batch.splitTriangleList(bytesPerSlot)) {
+            var allocation = ring.write(chunk.bytes(), 16);
+            var pipeline = execution.resources().requirePipeline(pipelineId);
+            execution.commands().setPrimitiveTopology(LuminPipelineCatalog.require(pipelineId).topology());
+            execution.commands().bindGraphicsPipeline(pipeline);
+            if (texture != null) descriptor = execution.resources().requireTextureDescriptor(texture);
+            if (descriptor == null) descriptor = execution.resources().requireFrameDescriptor();
+            execution.commands().bindDescriptorSet(pipeline, 0, descriptor);
+            execution.commands().bindVertexBuffer(0, allocation.buffer(), allocation.offset());
+            execution.commands().draw(chunk.vertexCount());
+        }
     }
 
     public void endFrame() {

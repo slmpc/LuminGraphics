@@ -25,6 +25,7 @@ import com.github.slmpc.lumingraphics.render.shader.GlslSandbox;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.List;
 
@@ -89,6 +90,8 @@ class Todo11MigrationSurfaceTest {
                 .vertex(0, 1, 0, WHITE).build(), "triangle", null, execution);
         renderer.endFrame(); renderer.close();
         assertEquals(List.of("triangle"), fake.boundPipelines());
+        assertTrue(fake.trace().contains("topology=TRIANGLE_LIST"));
+        assertTrue(fake.trace().contains("descriptor=frame"));
         assertTrue(fake.trace().contains("draw=3"));
     }
 
@@ -171,7 +174,11 @@ class Todo11MigrationSurfaceTest {
     @Test @DisplayName("MIG-SHADER-FXAA") void fxaaBindsInputAndPipeline() { assertEffect("fxaa", (f, e) -> { try (var s = new FxaaShader(f.resources(), 256)) { s.apply(e, new Render2DTexture.Resource("input")); }}); }
     @Test @DisplayName("MIG-SHADER-SANDBOX") void sandboxRejectsNonSandboxPipelineAndDrawsMenu() {
         FakeRhi fake = new FakeRhi(); assertThrows(IllegalArgumentException.class, () -> new GlslSandbox(fake.resources(), 256, "rectangle"));
-        try (var shader = new GlslSandbox(fake.resources(), 256, "menu-clouds")) { shader.apply(fake.execution(1, 0, 8, 8)); }
+        try (var shader = new GlslSandbox(fake.resources(), 256, "menu-clouds")) {
+            assertThrows(IllegalArgumentException.class, () -> shader.apply(fake.execution(1, 0, 8, 8)));
+            shader.apply(fake.execution(1, 0, 8, 8), new Render2DTexture.Resource("input"),
+                    ByteBuffer.allocate(16));
+        }
         assertEquals(List.of("menu-clouds"), fake.boundPipelines());
     }
 

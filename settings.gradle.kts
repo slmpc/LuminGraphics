@@ -14,6 +14,9 @@ include(
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
+        providers.gradleProperty("dependencyRepository").orNull?.let { repository ->
+            maven(repository)
+        }
         maven("https://slmpc.github.io/maven-repository/")
         mavenCentral {
             content {

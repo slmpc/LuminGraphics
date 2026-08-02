@@ -14,7 +14,7 @@ plugins {
 }
 
 group = "com.github.slmpc.lumingraphics"
-version = "1.0.0"
+version = "1.1.0-SNAPSHOT"
 
 val prismGroup = "com.github.slmpc.prismrhi"
 val prismVersion = "0.1.0"
@@ -45,6 +45,9 @@ subprojects {
     }
     tasks.withType<Test>().configureEach {
         useJUnitPlatform()
+        providers.systemProperty("lumin.epsilon.root").orNull?.let { epsilonRoot ->
+            systemProperty("lumin.epsilon.root", epsilonRoot)
+        }
     }
     tasks.withType<AbstractArchiveTask>().configureEach {
         isPreserveFileTimestamps = false
@@ -115,7 +118,7 @@ tasks.register("verifyTopology") {
         }
         check(gradle.includedBuilds.isEmpty()) { "Composite builds are forbidden" }
         check(rootProject.group.toString() == "com.github.slmpc.lumingraphics")
-        check(rootProject.version.toString() == "1.0.0")
+        check(rootProject.version.toString() == "1.1.0-SNAPSHOT")
 
         luminPublishedJavaModules.forEach { moduleName ->
             val module = project(":$moduleName")

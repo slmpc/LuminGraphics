@@ -27,7 +27,7 @@ class PublishedArchitectureTest {
 
         String ledgerPath = "docs/resources/manifest.csv";
         AssertionError ledgerError = assertThrows(AssertionError.class,
-                () -> rejectLedgerCounts(ledgerPath, 36, 4));
+                () -> rejectLedgerCounts(ledgerPath, 36, 0));
         assertTrue(ledgerError.getMessage().contains(ledgerPath), ledgerError::getMessage);
         System.out.println("ARCH_LUMIN_MUTATIONS rejected=net.minecraft.import,ledger-count-drift offenders=2");
     }
@@ -70,13 +70,15 @@ class PublishedArchitectureTest {
         int jarEntries = 0;
         int classEntries = 0;
         Set<String> namespaces = new HashSet<>();
+        Set<String> renderEntries = new HashSet<>();
         for (String module : List.of("lumin-graphics-core", "lumin-graphics-render", "lumin-graphics-text", "lumin-graphics-ui")) {
-            Path jar = repository.resolve(module).resolve("build/libs/" + module + "-1.0.0.jar");
+            Path jar = repository.resolve(module).resolve("build/libs/" + module + "-1.2.0.jar");
             assertTrue(Files.isRegularFile(jar), "missing published JAR: " + jar);
             try (JarFile archive = new JarFile(jar.toFile())) {
                 var entries = archive.entries();
                 while (entries.hasMoreElements()) {
                     var entry = entries.nextElement();
+                    if (module.equals("lumin-graphics-render")) renderEntries.add(entry.getName());
                     jarEntries++;
                     if (entry.getName().endsWith(".class")) {
                         classEntries++;
@@ -92,13 +94,22 @@ class PublishedArchitectureTest {
         assertTrue(sourceCount > 20 && classEntries > 20 && jarEntries > classEntries,
                 "architecture source/class/JAR counts must be nonzero");
         assertTrue(namespaces.equals(Set.of("core", "render", "text", "ui")), "public namespace ledger drift: " + namespaces);
+        assertTrue(renderEntries.containsAll(Set.of(
+                "com/github/slmpc/lumingraphics/render/shader/FullscreenEffect.class",
+                "com/github/slmpc/lumingraphics/render/shader/FullscreenEffectRequest.class",
+                "com/github/slmpc/lumingraphics/render/shader/FullscreenEffectBinding.class",
+                "com/github/slmpc/lumingraphics/render/shader/FullscreenEffectPass.class",
+                "com/github/slmpc/lumingraphics/render/resource/DefaultRenderResources.class",
+                "com/github/slmpc/lumingraphics/render/resource/DefaultVertexLayouts.class",
+                "com/github/slmpc/lumingraphics/render/resource/RenderResourceException.class"
+        )), "fullscreen effect API is missing from the published render JAR");
         List<String> migration = Files.readAllLines(repository.resolve("docs/migration/epsilon-surface.csv"));
         List<String> resources = Files.readAllLines(repository.resolve("docs/resources/manifest.csv"));
         assertTrue(migration.size() == 54, "epsilon ledger count drift: " + (migration.size() - 1));
         long shaders = resources.stream().skip(1).filter(row -> row.startsWith("shader,")).count();
         long fonts = resources.stream().skip(1).filter(row -> row.startsWith("font,")).count();
         rejectLedgerCounts(repository.resolve("docs/resources/manifest.csv").toString(), shaders, fonts);
-        System.out.printf("ARCH_LUMIN_COUNTS sources=%d classes=%d jars=4 entries=%d migration=53 shaders=37 fonts=4 namespaces=4%n",
+        System.out.printf("ARCH_LUMIN_COUNTS sources=%d classes=%d jars=4 entries=%d migration=53 shaders=37 fonts=0 namespaces=4%n",
                 sourceCount, classEntries, jarEntries);
     }
 
@@ -114,7 +125,7 @@ class PublishedArchitectureTest {
     }
 
     private static void rejectLedgerCounts(String path, long shaders, long fonts) {
-        if (shaders != 37 || fonts != 4) {
+        if (shaders != 37 || fonts != 0) {
             throw new AssertionError("resource ledger count drift in " + path + ": shaders=" + shaders + " fonts=" + fonts);
         }
     }

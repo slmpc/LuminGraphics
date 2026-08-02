@@ -85,14 +85,27 @@ public final class Render2DScheduler implements AutoCloseable {
                 int end = start + 1;
                 while (end < ordered.size() && batchCompatible(command, ordered.get(end))) end++;
                 Render2DScissor framebuffer = new Render2DScissor(0, 0, execution.width(), execution.height());
-                execution.commands().setScissor(command.scissor() == null
-                        ? framebuffer.toRhi() : framebuffer.intersect(command.scissor()).toRhi());
+                Render2DScissor effectiveScissor = command.scissor() == null
+                        ? framebuffer : intersection(framebuffer, command.scissor());
+                if (effectiveScissor == null) {
+                    start = end;
+                    continue;
+                }
+                execution.commands().setScissor(effectiveScissor.toRhi());
                 renderers.renderBatch(ordered.subList(start, end), execution);
                 start = end;
             }
         } finally {
             renderers.endFrame();
         }
+    }
+
+    private static Render2DScissor intersection(Render2DScissor first, Render2DScissor second) {
+        int left = Math.max(first.x(), second.x());
+        int top = Math.max(first.y(), second.y());
+        int right = Math.min(Math.addExact(first.x(), first.width()), Math.addExact(second.x(), second.width()));
+        int bottom = Math.min(Math.addExact(first.y(), first.height()), Math.addExact(second.y(), second.height()));
+        return right <= left || bottom <= top ? null : new Render2DScissor(left, top, right - left, bottom - top);
     }
 
     public void flushAndClear(RenderExecution execution) {

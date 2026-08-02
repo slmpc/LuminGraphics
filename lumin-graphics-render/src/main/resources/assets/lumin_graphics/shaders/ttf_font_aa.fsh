@@ -16,8 +16,12 @@ LUMIN_BINDING(1) uniform sampler2D Sampler0;
 
 layout(location = 0) out vec4 f_Color;
 
+const float EDGE_THRESHOLD = 0.5;
+
 void main() {
-    float alpha = texture(Sampler0, v_TexCoord).r;
+    float signedDistance = texture(Sampler0, v_TexCoord).r - EDGE_THRESHOLD;
+    float edgeWidth = max(fwidth(signedDistance), 1.0 / 255.0);
+    float alpha = smoothstep(-edgeWidth, edgeWidth, signedDistance);
     f_Color = vec4(v_Color.rgb, v_Color.a * alpha);
 
     if (f_Color.a < 0.005) {

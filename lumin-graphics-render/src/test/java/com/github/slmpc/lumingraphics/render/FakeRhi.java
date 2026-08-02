@@ -4,12 +4,19 @@ import com.github.slmpc.lumingraphics.render.frame.RenderExecution;
 import com.github.slmpc.lumingraphics.render.resource.RenderResources;
 import com.github.slmpc.lumingraphics.render.scheduler.Render2DTexture;
 import com.github.slmpc.lumingraphics.render.scheduler.Render2DCommand;
+import com.github.slmpc.lumingraphics.render.shader.FullscreenEffectBinding;
+import com.github.slmpc.lumingraphics.render.shader.FullscreenEffectPass;
+import com.github.slmpc.lumingraphics.render.shader.FullscreenEffectRequest;
 import com.github.slmpc.prismrhi.backend.BackendApi;
 import com.github.slmpc.prismrhi.command.RhiCommandBuffer;
 import com.github.slmpc.prismrhi.descriptor.RhiDescriptorSet;
 import com.github.slmpc.prismrhi.device.RhiDevice;
 import com.github.slmpc.prismrhi.pipeline.RhiGraphicsPipeline;
 import com.github.slmpc.prismrhi.resource.RhiBuffer;
+import com.github.slmpc.prismrhi.resource.RhiImageView;
+import com.github.slmpc.prismrhi.rendering.RhiRect2D;
+import com.github.slmpc.prismrhi.rendering.RhiRenderingAttachment;
+import com.github.slmpc.prismrhi.rendering.RhiRenderingInfo;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -17,6 +24,7 @@ import java.lang.reflect.Proxy;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.HexFormat;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 final class FakeRhi {
@@ -50,6 +58,10 @@ final class FakeRhi {
                 trace.add("pipeline=" + id);
                 return proxy(RhiGraphicsPipeline.class, FakeRhi::resourceCall);
             }
+            @Override public RhiDescriptorSet requireFrameDescriptor() {
+                trace.add("descriptor=frame");
+                return proxy(RhiDescriptorSet.class, FakeRhi::resourceCall);
+            }
             @Override public RhiDescriptorSet requireTextureDescriptor(Render2DTexture texture) {
                 String id = texture instanceof Render2DTexture.Resource resource ? resource.id() : "lumin";
                 if (id.equals("missing")) throw new IllegalStateException("missing texture: " + id);
@@ -60,6 +72,24 @@ final class FakeRhi {
                 segmentedPayloads.add(shadow);
                 trace.add("segmentedDescriptor=" + shadow.segmentCount());
                 return proxy(RhiDescriptorSet.class, FakeRhi::resourceCall);
+            }
+            @Override public FullscreenEffectBinding requireFullscreenEffectBinding(
+                    FullscreenEffectRequest request, RenderExecution execution) {
+                String id = request.input() instanceof Render2DTexture.Resource resource ? resource.id() : "lumin";
+                if (id.equals("missing")) throw new IllegalStateException("missing effect input: " + id);
+                trace.add("effectInput=" + id);
+                trace.add("descriptor=" + id);
+                trace.add("effectUniformBytes=" + request.uniforms().remaining());
+                ByteBuffer uniformBytes = request.uniforms();
+                byte[] encoded = new byte[uniformBytes.remaining()];
+                uniformBytes.get(encoded);
+                trace.add("effectUniformHex=" + HexFormat.of().formatHex(encoded));
+                trace.add("effectDescriptor=" + request.pipelineId());
+                RhiDescriptorSet descriptor = proxy(RhiDescriptorSet.class, FakeRhi::resourceCall);
+                RhiImageView view = proxy(RhiImageView.class, FakeRhi::resourceCall);
+                RhiRenderingInfo rendering = RhiRenderingInfo.builder(RhiRect2D.of(execution.width(), execution.height()))
+                        .color(RhiRenderingAttachment.color(view)).build();
+                return new FullscreenEffectBinding(descriptor, FullscreenEffectPass.rendering(rendering));
             }
         };
     }
@@ -104,10 +134,21 @@ final class FakeRhi {
                         + rect.extent().width() + "," + rect.extent().height());
                 yield null;
             }
+            case "setPrimitiveTopology" -> {
+                trace.add("topology=" + args[0]);
+                yield null;
+            }
             case "bindVertexBuffer" -> { trace.add("vertexBuffer=" + args[2]); yield null; }
             case "begin" -> { trace.add("command.begin"); yield null; }
             case "end" -> { trace.add("command.end"); yield null; }
             case "bindGraphicsPipeline", "bindDescriptorSet", "setViewport", "close" -> null;
+            case "beginRendering" -> {
+                var info = (RhiRenderingInfo) args[0];
+                trace.add("render.begin=" + info.renderArea().extent().width() + "x"
+                        + info.renderArea().extent().height());
+                yield null;
+            }
+            case "endRendering" -> { trace.add("render.end"); yield null; }
             case "draw" -> {
                 if (failNextDraw) { failNextDraw = false; throw new IllegalStateException("backend draw failed"); }
                 int vertices = args[0] instanceof Integer value ? value

@@ -29,6 +29,34 @@ four published graphics modules plus version-specific common surfaces. Read
 [resources](resources/README.md) and [migration](migration/README.md) before
 changing either ledger.
 
+## Fullscreen Effects
+
+`BlurShader`, `FxaaShader`, `FilterShader`, and `GlslSandbox` accept an explicit
+`Render2DTexture` plus a caller-encoded `ByteBuffer` containing the fragment
+shader's dynamic uniform block. The effect snapshots those bytes in a
+`FullscreenEffectRequest`; `RenderResources.requireFullscreenEffectBinding`
+must resolve a descriptor that combines that exact sampled input and uniform
+payload. Its returned `FullscreenEffectPass` selects either the caller's
+existing render pass (`external()`) or one balanced Prism dynamic-rendering
+pass (`rendering(info)`). Sandbox application without an input and descriptor
+payload is rejected.
+
+## Default Render Resources
+
+`DefaultRenderResources` supplies the standard catalog pipelines, per-frame
+uniform descriptor, sampled texture descriptors, and segmented-shadow payloads
+for callers that do not need a custom `RenderResources` implementation. Supply
+frame uniforms through `updateFrameUniforms(ByteBuffer)`. The buffer must be
+exactly `DefaultRenderResources.FRAME_UNIFORM_BYTES` (80) bytes: the std140
+`mat4 Projection` followed by `vec4 Viewport`. The API deliberately accepts
+raw bytes so it has no JOML or platform-specific dependency. The resource owner
+must close the instance on the Prism render thread after dependent renderers
+are closed.
+
+Custom `RenderResources` implementations must return their shared frame-uniform
+descriptor from `requireFrameDescriptor()`. Immediate untextured 2D draws bind
+that descriptor automatically; sampled draws use `requireTextureDescriptor()`.
+
 ## Demo
 
 `lumin-graphics-demo` supplies `StandaloneSmoke`, `VulkanStandaloneSmoke`, and

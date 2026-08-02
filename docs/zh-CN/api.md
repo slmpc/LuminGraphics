@@ -43,7 +43,7 @@ GLSL 源码是保留资源；生成的 SPIR-V 由任务产生，不能手工修�
 
 ## UI：构建、校验和渲染
 
-`UiTree.build(scope -> { ... })` 使用 `UiTree.Scope` 构建一帧不可变的节点快照。坐标默认相对当前 scope；`push` 建立相对区域，`pushAbsolute` 使用绝对区域，`scissor` 建立裁剪树。
+`UiTree.build(scope -> { ... })` 使用 `UiTree.Scope` 构建一帧不可变的节点快照。坐标默认相对当前 scope；`push` 建立相对区域，`pushAbsolute` 使用绝对区域，`scissor` 建立裁剪树。scissor 只裁剪最终输出，子节点可超出其边界以支持滚动与展开动画。`scissorIf` 可在不改变调用方 scope 的前提下按条件建立裁剪；`Stack.item` 可同时向回调提供已解析的绝对 `UiRect` 和 item scope。字体与纹理通过稳定的字符串 ID 引用，viewport 目标使用公开的 `UiViewportTarget`。
 
 ```java
 UiTree tree = UiTree.build(ui -> {

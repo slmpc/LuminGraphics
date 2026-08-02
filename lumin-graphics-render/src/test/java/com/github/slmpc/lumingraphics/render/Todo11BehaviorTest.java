@@ -12,6 +12,7 @@ import com.github.slmpc.lumingraphics.render.scheduler.Render3DScheduler;
 import org.junit.jupiter.api.Test;
 
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -73,6 +74,30 @@ class Todo11BehaviorTest {
         scheduler.clear();
         assertTrue(scheduler.isEmpty());
         scheduler.flush(fake.execution(8, 7, 32, 24));
+        scheduler.close();
+    }
+
+    @Test
+    void schedulerSplitsOversizedCompatibleBatchesWithoutChangingDrawOrder() {
+        FakeRhi fake = new FakeRhi();
+        RendererSet renderers = RendererSet.create(fake.resources(), 96);
+        Render2DScheduler scheduler = new Render2DScheduler(renderers, 8);
+        LuminColor white = new LuminColor(1, 1, 1, 1);
+
+        var dropdown = scheduler.layer(3);
+        dropdown.pushScissor(new Render2DScissor(1, 2, 30, 20));
+        dropdown.addRect(new Render2DBounds(2, 3, 4, 5), white);
+        dropdown.addRect(new Render2DBounds(8, 3, 4, 5), white);
+        dropdown.addRect(new Render2DBounds(14, 3, 4, 5), white);
+        dropdown.popScissor();
+        scheduler.layer(4).addTriangle(22, 8, 2, white);
+
+        scheduler.flush(fake.execution(1, 0, 32, 24));
+
+        assertEquals(List.of("rectangle", "rectangle", "rectangle", "triangle"), fake.boundPipelines());
+        assertEquals(List.of(2.0f, 8.0f, 14.0f), fake.writes().subList(0, 3).stream()
+                .map(bytes -> ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN).getFloat()).toList());
+        assertEquals(1, fake.trace().stream().filter("scissor=1,2,30,20"::equals).count());
         scheduler.close();
     }
 

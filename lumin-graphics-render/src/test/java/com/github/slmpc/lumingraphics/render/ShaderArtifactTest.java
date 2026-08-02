@@ -125,6 +125,16 @@ class ShaderArtifactTest {
     }
 
     @Test
+    void ttfAaShaderReconstructsTheStbSignedDistanceEdge() throws Exception {
+        String shader = Files.readString(
+                RESOURCES.resolve("assets/lumin_graphics/shaders/ttf_font_aa.fsh"));
+
+        assertTrue(shader.contains("EDGE_THRESHOLD = 0.5"));
+        assertTrue(shader.contains("fwidth(signedDistance)"));
+        assertTrue(shader.contains("smoothstep(-edgeWidth, edgeWidth, signedDistance)"));
+    }
+
+    @Test
     void rejectsNamedSpirvMutations() throws Exception {
         Path path = GENERATED.resolve("assets/lumin_graphics/shaders/spirv/rectangle.vsh.spv");
         byte[] original = Files.readAllBytes(path);

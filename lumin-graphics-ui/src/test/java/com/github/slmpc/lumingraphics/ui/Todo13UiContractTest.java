@@ -155,9 +155,20 @@ final class Todo13UiContractTest {
     @Test void renderer() { // MIG-UI-RENDERER
         UiTree tree = UiTree.build(scope -> scope.scissor(new UiRect(0, 0, 10, 10), clipped ->
                 clipped.scissor(new UiRect(20, 20, 2, 2), skipped -> skipped.rect(0, 0, 1, 1, WHITE))));
-        assertThrows(UiMalformedTreeException.class, tree::validate);
-        assertThrows(UiMalformedTreeException.class, () -> UiTree.of(List.of(new Scissor(
-                new UiRect(20, 20, 1, 1), List.of(new Rect(new UiRect(0, 0, 1, 1), WHITE))))).validate());
+        assertDoesNotThrow(tree::validate);
+        try (UiRenderBatch batch = batch()) {
+            assertDoesNotThrow(() -> batch.render(tree));
+            assertTrue(batch.scheduler().isEmpty());
+        }
+        UiTree overflowingLeaf = UiTree.of(List.of(new Scissor(
+                new UiRect(0, 0, 10, 10), List.of(new Rect(new UiRect(20, 20, 1, 1), WHITE)))));
+        assertDoesNotThrow(overflowingLeaf::validate);
+        FakeRhi clippedRhi = new FakeRhi();
+        try (UiRenderBatch batch = batch(clippedRhi)) {
+            assertDoesNotThrow(() -> batch.render(overflowingLeaf));
+            batch.flushAndClear(clippedRhi.execution());
+        }
+        assertTrue(clippedRhi.trace().contains("scissor=0,0,10,10"));
         assertAll(() -> assertThrows(IllegalArgumentException.class, () -> new SegmentedShadow(
                         new UiRect(0,0,1,1),new float[]{1},1,WHITE,new float[0],new float[0],0)),
                 () -> assertThrows(IllegalArgumentException.class, () -> new Slider(new UiRect(0,0,1,1),
@@ -175,6 +186,26 @@ final class Todo13UiContractTest {
                     new Text("missing font",0,0,1,WHITE,"body")))));
             assertTrue(batch.scheduler().isEmpty());
         }
+    }
+
+    @Test void scissorsClipOffscreenAnimationBoundsWithoutCrashing() {
+        UiTree entering = UiTree.build(scope -> scope.scissor(new UiRect(-6, -5, 10, 10),
+                clipped -> clipped.rect(0, 0, 10, 10, WHITE)));
+        FakeRhi enteringRhi = new FakeRhi();
+        try (UiRenderBatch batch = batch(enteringRhi)) {
+            assertDoesNotThrow(() -> batch.render(entering));
+            assertDoesNotThrow(() -> batch.flushAndClear(enteringRhi.execution()));
+        }
+        assertTrue(enteringRhi.trace().contains("scissor=0,0,4,5"));
+
+        UiTree hidden = UiTree.build(scope -> scope.scissor(new UiRect(400, 300, 10, 10),
+                clipped -> clipped.rect(0, 0, 10, 10, WHITE)));
+        FakeRhi hiddenRhi = new FakeRhi();
+        try (UiRenderBatch batch = batch(hiddenRhi)) {
+            assertDoesNotThrow(() -> batch.render(hidden));
+            assertDoesNotThrow(() -> batch.flushAndClear(hiddenRhi.execution()));
+        }
+        assertFalse(hiddenRhi.trace().stream().anyMatch(entry -> entry.startsWith("scissor=")));
     }
 
     @Test void contentBuffer() { // MIG-UI-CONTENT-BUFFER

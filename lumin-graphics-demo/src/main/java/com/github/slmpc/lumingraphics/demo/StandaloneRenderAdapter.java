@@ -12,6 +12,9 @@ import com.github.slmpc.lumingraphics.render.scheduler.Render2DCommand;
 import com.github.slmpc.lumingraphics.render.scheduler.Render2DScheduler;
 import com.github.slmpc.lumingraphics.render.scheduler.Render2DTexture;
 import com.github.slmpc.lumingraphics.render.shader.FxaaShader;
+import com.github.slmpc.lumingraphics.render.shader.FullscreenEffectBinding;
+import com.github.slmpc.lumingraphics.render.shader.FullscreenEffectPass;
+import com.github.slmpc.lumingraphics.render.shader.FullscreenEffectRequest;
 import com.github.slmpc.lumingraphics.render.shader.ShaderArtifactLibrary;
 import com.github.slmpc.lumingraphics.text.atlas.AtlasPixelFormat;
 import com.github.slmpc.lumingraphics.text.atlas.AtlasPixels;
@@ -153,6 +156,8 @@ final class StandaloneRenderAdapter implements RenderResources, UiResourceResolv
         return pipeline;
     }
 
+    @Override public RhiDescriptorSet requireFrameDescriptor() { return frameSet; }
+
     @Override public RhiDescriptorSet requireTextureDescriptor(Render2DTexture texture) {
         TextureResource resource = textures.get(texture);
         if (resource == null) throw new IllegalArgumentException("demo texture is unavailable: " + texture);
@@ -161,6 +166,15 @@ final class StandaloneRenderAdapter implements RenderResources, UiResourceResolv
 
     @Override public RhiDescriptorSet requireSegmentedShadowDescriptor(Render2DCommand.SegmentedShadow ignored) {
         throw new IllegalArgumentException("segmented shadows are not part of the standalone scene");
+    }
+
+    @Override public FullscreenEffectBinding requireFullscreenEffectBinding(
+            FullscreenEffectRequest request, RenderExecution execution) {
+        if (!request.pipelineId().equals("fxaa")) {
+            throw new IllegalArgumentException("demo fullscreen effect is unavailable: " + request.pipelineId());
+        }
+        if (request.uniforms().hasRemaining()) fxaaBuffer.write(request.uniforms());
+        return new FullscreenEffectBinding(requireTextureDescriptor(request.input()), FullscreenEffectPass.external());
     }
 
     @Override public Render2DTexture texture(String id) {

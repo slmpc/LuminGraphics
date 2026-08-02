@@ -19,6 +19,8 @@ public final class LuminRingBuffer implements AutoCloseable {
     private boolean frameActive;
     private int currentSlot;
     private int offset;
+    private long activeFrameId;
+    private long completedFrameId;
 
     public LuminRingBuffer(RhiDevice device, int capacity, int slotCount) {
         if (device == null || capacity <= 0 || slotCount < 2) {
@@ -58,6 +60,8 @@ public final class LuminRingBuffer implements AutoCloseable {
         currentSlot = candidate;
         lastFrames[candidate] = frameId;
         offset = 0;
+        activeFrameId = frameId;
+        this.completedFrameId = completedFrameId;
         frameActive = true;
     }
 
@@ -68,8 +72,12 @@ public final class LuminRingBuffer implements AutoCloseable {
         }
         int aligned = Math.addExact(offset, alignment - 1) & -alignment;
         int length = source.remaining();
-        if (length > capacity - aligned) {
+        if (length > capacity) {
             throw new IllegalArgumentException("ring capacity exceeded");
+        }
+        if (length > capacity - aligned) {
+            advanceSlot();
+            aligned = 0;
         }
         slots[currentSlot].write(aligned, source.slice());
         offset = aligned + length;
@@ -88,6 +96,19 @@ public final class LuminRingBuffer implements AutoCloseable {
     private void requireActive() {
         requireOpen();
         if (!frameActive) throw new IllegalStateException("ring frame is not active");
+    }
+
+    private void advanceSlot() {
+        for (int index = 1; index < slots.length; index++) {
+            int candidate = Math.floorMod(currentSlot + index, slots.length);
+            if (lastFrames[candidate] <= completedFrameId) {
+                currentSlot = candidate;
+                lastFrames[candidate] = activeFrameId;
+                offset = 0;
+                return;
+            }
+        }
+        throw new IllegalArgumentException("ring capacity exceeded");
     }
 
     private void requireOpen() {

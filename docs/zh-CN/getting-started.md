@@ -10,7 +10,7 @@ LuminGraphics 的 group 为 `com.github.slmpc.lumingraphics`，当前版本由�
 
 ```kotlin
 dependencies {
-    implementation(platform("com.github.slmpc.lumingraphics:lumin-graphics-bom:1.0.0"))
+    implementation(platform("com.github.slmpc.lumingraphics:lumin-graphics-bom:1.2.1"))
     implementation("com.github.slmpc.lumingraphics:lumin-graphics-ui")
 }
 ```
