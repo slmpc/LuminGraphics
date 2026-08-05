@@ -14,10 +14,10 @@ plugins {
 }
 
 group = "com.github.slmpc.lumingraphics"
-version = "1.1.0"
+version = "1.2.0"
 
 val prismGroup = "com.github.slmpc.prismrhi"
-val prismVersion = "0.1.1-SNAPSHOT"
+val prismVersion = "0.2.0"
 extra["prismGroup"] = prismGroup
 extra["prismVersion"] = prismVersion
 val luminPublishedJavaModules = listOf(
@@ -118,7 +118,7 @@ tasks.register("verifyTopology") {
         }
         check(gradle.includedBuilds.isEmpty()) { "Composite builds are forbidden" }
         check(rootProject.group.toString() == "com.github.slmpc.lumingraphics")
-        check(rootProject.version.toString() == "1.1.0")
+        check(rootProject.version.toString() == "1.2.0")
 
         luminPublishedJavaModules.forEach { moduleName ->
             val module = project(":$moduleName")
@@ -220,7 +220,7 @@ val architectureCheck by tasks.registering(Test::class) {
     }
 }
 
-for (smoke in listOf("gl41Smoke", "glDsaSmoke", "vulkanSmoke", "wrongContextSmoke", "missingShaderSmoke")) {
+for (smoke in listOf("gl41Smoke", "gl46Smoke", "vulkanSmoke", "wrongContextSmoke", "missingShaderSmoke")) {
     tasks.register(smoke) {
         group = "verification"
         dependsOn(":lumin-graphics-demo:$smoke")

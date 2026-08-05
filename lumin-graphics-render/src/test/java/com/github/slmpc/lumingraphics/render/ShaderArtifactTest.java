@@ -59,7 +59,7 @@ class ShaderArtifactTest {
                 .collect(java.util.stream.Collectors.toMap(columns -> columns[0], columns -> columns[1]));
         assertEquals("1", completion.get("format"));
         assertEquals("37", completion.get("source_count"));
-        assertEquals("com.github.slmpc.prismrhi:prism-rhi-shaderc:0.1.1-SNAPSHOT", completion.get("compiler"));
+        assertEquals("com.github.slmpc.prismrhi:prism-rhi-shaderc:0.2.0", completion.get("compiler"));
         assertEquals("vulkan1.3-spirv1.6-opt-none-LUMIN_VULKAN=1", completion.get("target"));
         assertEquals(sha256(Files.readAllBytes(generatedManifestPath)), completion.get("manifest_sha256"),
                 "completion marker does not bind the generated manifest");

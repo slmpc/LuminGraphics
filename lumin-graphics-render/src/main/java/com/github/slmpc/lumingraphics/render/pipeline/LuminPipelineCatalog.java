@@ -11,7 +11,7 @@ import java.util.Set;
 /**
  * 创建 Prism 管线时使用的后端无关描述表。
  *
- * <p>GL41/DSA 直接使用保留的 GLSL 410 源码。构建任务在交给 Prism Shaderc 前仅把版本头改为
+ * <p>GL41/OpenGL 4.6 直接使用保留的 GLSL 410 源码。构建任务在交给 Prism Shaderc 前仅把版本头改为
  * 450 并定义 {@code LUMIN_VULKAN=1}，从而启用 Vulkan 所需的显式 descriptor binding 和顶点
  * 索引拼写。调用方应通过 {@link #entries()} 或 {@link #require(String)} 查询，而不是复制路径。</p>
  */

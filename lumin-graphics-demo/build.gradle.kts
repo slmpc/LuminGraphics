@@ -15,7 +15,7 @@ val lwjglNatives = when {
 dependencies {
     implementation(project(":lumin-graphics-ui"))
     implementation("$prismGroup:prism-rhi-backend-opengl41:$prismVersion")
-    implementation("$prismGroup:prism-rhi-backend-opengl-dsa:$prismVersion")
+    implementation("$prismGroup:prism-rhi-backend-opengl46:$prismVersion")
     implementation("$prismGroup:prism-rhi-backend-vulkan:$prismVersion")
     implementation(platform("org.lwjgl:lwjgl-bom:$lwjglVersion"))
     implementation("org.lwjgl:lwjgl")
@@ -44,7 +44,7 @@ fun registerSmoke(name: String, mode: String) = tasks.register<JavaExec>(name) {
 }
 
 registerSmoke("gl41Smoke", "gl41")
-registerSmoke("glDsaSmoke", "gldsa")
+registerSmoke("gl46Smoke", "gl46")
 registerSmoke("vulkanSmoke", "vulkan")
 registerSmoke("wrongContextSmoke", "wrong-context")
 registerSmoke("missingShaderSmoke", "missing-shader")

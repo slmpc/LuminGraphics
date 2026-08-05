@@ -20,7 +20,7 @@ dependencies {
         api("$prismGroup:prism-rhi-core:$prismVersion")
         api("$prismGroup:prism-rhi-backend-opengl-common:$prismVersion")
         api("$prismGroup:prism-rhi-backend-opengl41:$prismVersion")
-        api("$prismGroup:prism-rhi-backend-opengl-dsa:$prismVersion")
+        api("$prismGroup:prism-rhi-backend-opengl46:$prismVersion")
         api("$prismGroup:prism-rhi-backend-vulkan:$prismVersion")
     }
 }

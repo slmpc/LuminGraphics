@@ -96,7 +96,7 @@ fun registerGlShaderTest(name: String, major: Int, minor: Int) = tasks.register<
 }
 
 registerGlShaderTest("shaderGl41Test", 4, 1)
-registerGlShaderTest("shaderGlDsaTest", 4, 5)
+registerGlShaderTest("shaderGl46Test", 4, 6)
 
 tasks.named<Test>("test") {
     exclude("**/ShaderGlContextTest.class")

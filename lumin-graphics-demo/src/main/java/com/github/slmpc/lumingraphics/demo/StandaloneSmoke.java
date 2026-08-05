@@ -11,7 +11,7 @@ import com.github.slmpc.prismrhi.PrismRHI;
 import com.github.slmpc.prismrhi.backend.RhiBackendProvider;
 import com.github.slmpc.prismrhi.backend.opengl.OpenGlExternalContext;
 import com.github.slmpc.prismrhi.backend.opengl41.Gl41BackendProvider;
-import com.github.slmpc.prismrhi.backend.opengldsa.GlDsaBackendProvider;
+import com.github.slmpc.prismrhi.backend.opengl46.Gl46BackendProvider;
 import com.github.slmpc.prismrhi.context.RhiContextIdentity;
 import com.github.slmpc.prismrhi.context.RhiInvalidationToken;
 import com.github.slmpc.prismrhi.device.RhiDevice;
@@ -61,7 +61,7 @@ public final class StandaloneSmoke {
         String mode = args.length == 0 ? "gl41" : args[0];
         switch (mode) {
             case "gl41" -> runGl("gl41", 4, 1, false, fontResource());
-            case "gldsa" -> runGl("gldsa", 4, 5, false, fontResource());
+            case "gl46" -> runGl("gl46", 4, 6, false, fontResource());
             case "wrong-context" -> runGl("wrong-context", 4, 1, true, fontResource());
             case "missing-shader" -> missingShader();
             case "vulkan" -> VulkanStandaloneSmoke.run(evidenceDir(), fontResource());
@@ -95,8 +95,8 @@ public final class StandaloneSmoke {
             OpenGlExternalContext external = new OpenGlExternalContext(
                     capabilities, Thread.currentThread(), identity, invalidation,
                     expected -> glfwGetCurrentContext() == ownedWindow && identity.equals(expected));
-            RhiBackendProvider provider = backend.equals("gldsa")
-                    ? new GlDsaBackendProvider(external) : new Gl41BackendProvider(external);
+            RhiBackendProvider provider = backend.equals("gl46")
+                    ? new Gl46BackendProvider(external) : new Gl41BackendProvider(external);
 
             if (wrongContext) {
                 glfwMakeContextCurrent(secondWindow);

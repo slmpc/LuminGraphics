@@ -17,22 +17,29 @@ caller-owned graphics context/resource lifetime visible at every boundary.
 ## Ordered 2D Batching
 
 `Render2DScheduler` treats each integer layer as a strict ordering boundary.
-Within one layer it first collapses compatible commands into exact batch groups.
-Only those groups, rather than every primitive, participate in the painter-order
-dependency graph. Ready groups keep the current exact batch or pipeline when
-possible. The exact key includes scissor and sampled texture, so glyphs from
-different atlas pages never share a draw.
-Callers can use `UiTree.Scope.layer(...)`, layered primitive overloads, or a
-scene-relative layer to express ordering that must remain explicit. Commands in
-one layer are pipeline-batched; use distinct layers for exact foreground and
-background ordering. Non-overlapping groups may still merge across layers.
+Commands are collected into per-layer buckets at submission time, and flush
+plans every layer independently in ascending order. Within one layer,
+`Render2DBatchPlanner` collapses commands with the same exact key (pipeline,
+scissor, and sampled texture) into a single batch group. Pipeline groups are
+ordered by their first appearance, and exact state groups remain in first
+appearance order inside each pipeline, so interleaved pipelines become
+contiguous pipeline runs. Glyphs from different atlas pages never share a draw,
+and segmented shadows always render as isolated batches even when their
+pipeline run is adjacent.
+
+The planner never rebuilds a spatial index or a painter-order dependency graph:
+its cost is O(N + G) per layer (N commands, G batch groups) and all scratch
+buffers are reused across frames, which keeps typical 1k-2k command GUI frames
+cheap. Exact foreground/background ordering is expressed manually with
+`UiTree.Scope.layer(...)`, layered primitive overloads, or a scene-relative
+layer; distinct layers are never merged or reordered.
 
 ## Shaders And Resources
 
 Run `:lumin-graphics-render:compileShaders` to transform retained GLSL under
 `lumin-graphics-render/src/main/resources/assets/lumin_graphics/shaders` into
 generated Vulkan 1.3/SPIR-V 1.6 resources. Validate with `shaderCompileTest`;
-`shaderGl41Test` and `shaderGlDsaTest` additionally compile/link the catalog in
+`shaderGl41Test` and `shaderGl46Test` additionally compile/link the catalog in
 hidden OpenGL contexts. Never edit generated outputs.
 
 The resource manifest contains 37 shader entries. Font data is not packaged:
@@ -73,5 +80,5 @@ that descriptor automatically; sampled draws use `requireTextureDescriptor()`.
 ## Demo
 
 `lumin-graphics-demo` supplies `StandaloneSmoke`, `VulkanStandaloneSmoke`, and
-`CallerOwnedVulkanContext`. Run `gl41Smoke`, `glDsaSmoke`, `vulkanSmoke`,
+`CallerOwnedVulkanContext`. Run `gl41Smoke`, `gl46Smoke`, `vulkanSmoke`,
 `wrongContextSmoke`, or `missingShaderSmoke` through the root wrapper.

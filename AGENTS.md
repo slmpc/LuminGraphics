@@ -62,7 +62,7 @@ configured for this repository.
 .\gradlew.bat check
 .\gradlew.bat architectureCheck
 .\gradlew.bat :lumin-graphics-render:compileShaders shaderCompileTest
-.\gradlew.bat gl41Smoke glDsaSmoke vulkanSmoke
+.\gradlew.bat gl41Smoke gl46Smoke vulkanSmoke
 ```
 
 ## Documentation

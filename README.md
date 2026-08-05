@@ -1,4 +1,4 @@
-# LuminGraphics 1.2.1
+# LuminGraphics 1.2.0
 
 LuminGraphics is a Java 17 graphics library stack over PrismRHI. Its published
 modules are `lumin-graphics-core`, `lumin-graphics-render`,
@@ -18,10 +18,10 @@ For offline verification against a local Maven mirror, pass
 `-PdependencyRepository=D:/path/to/maven-repository`. Publications continue to
 use the separate `publishRepository` property.
 
-## Local SNAPSHOT publishing
+## Local release publishing
 
-Development publications use `1.1.0-SNAPSHOT`. Republish the same coordinate
-after each edit to the shared local repository without changing the version:
+The current release is `1.2.0`. Publish all modules to the shared local
+repository with:
 
 ```powershell
 .\gradlew.bat publish -PpublishRepository=D:\Dev\ChenMeng\maven-repository

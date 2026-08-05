@@ -123,9 +123,9 @@ class AdvancedPrimitiveTest {
             layer.popScissor();
             scheduler.flushAndClear(fake.execution(1, 0, 100, 100));
         }
-        assertEquals(List.of("scissor=20,10,20,30", "scissor=0,0,80,80"),
+        assertEquals(List.of("scissor=0,0,80,80", "scissor=20,10,20,30"),
                 fake.trace().stream().filter(line -> line.startsWith("scissor=")).toList());
-        assertEquals(List.of("ttf-font-aa", "rectangle"), fake.boundPipelines());
+        assertEquals(List.of("rectangle", "ttf-font-aa"), fake.boundPipelines());
     }
 
     @Test

@@ -22,7 +22,7 @@
 
 ## Render：命令与 shader
 
-`Render2DScheduler` 收集按 layer 排序的 2D 命令，renderer 在一个已开始的 `RenderFrame` 内消费命令。规划器先在每个手动 layer 内按 pipeline、scissor 和采样纹理聚合命令，再只为数量较少的批次组建立遮挡依赖；规划成本因此取决于批次组数，而不是图元数。同一 layer 优先合批，必须精确保序的前景与背景应放入不同 layer；不同 layer 中互不相交的 Panel、背景和文字仍可跨层重排并合批。纹理、字体 Atlas 和 scissor 都属于精确批次键，不会跨资源误合并。`LuminPipelineCatalog.entries()` 是稳定的管线描述表；不要根据文件名手写重复的 shader 路径。
+`Render2DScheduler` 在提交时把 2D 命令直接存入各整数 layer 的桶，renderer 在一个已开始的 `RenderFrame` 内按 layer 升序消费命令。`Render2DBatchPlanner` 在每个 layer 内按 pipeline、scissor 和采样纹理这一精确批次键聚合命令；pipeline 组按首次出现顺序排列，同一 pipeline 的多个纹理或 scissor batch 会连续提交，因此不会形成 pipeline1/pipeline2 交错切换。规划器不再建立空间索引或遮挡依赖图，复杂度和分配量都是 O(N + G)（N 为命令数，G 为批次组数），工作缓冲跨帧复用，适合 1k~2k 图元的 GUI 帧。纹理、字体 Atlas 和 scissor 都属于精确批次键，不会跨资源误合并；分段阴影即使 pipeline 相邻也保持独立 draw；必须精确保序的前景与背景应放入不同 layer，不同 layer 不会被重排或合并。`LuminPipelineCatalog.entries()` 是稳定的管线描述表；不要根据文件名手写重复的 shader 路径。
 
 构建 Vulkan shader 资源：
 
