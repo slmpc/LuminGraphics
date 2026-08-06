@@ -17,9 +17,10 @@ group = "com.github.slmpc.lumingraphics"
 version = "1.2.0"
 
 val prismGroup = "com.github.slmpc.prismrhi"
-val prismVersion = "0.2.0"
-extra["prismGroup"] = prismGroup
-extra["prismVersion"] = prismVersion
+val prismVersion = libs.versions.prism.get()
+val junitBom = libs.junit.bom
+val junitJupiter = libs.junit.jupiter
+val junitPlatformLauncher = libs.junit.platform.launcher
 val luminPublishedJavaModules = listOf(
     "lumin-graphics-core",
     "lumin-graphics-render",
@@ -64,9 +65,9 @@ configure(luminPublishedJavaModules.map(::project)) {
         withSourcesJar()
     }
     dependencies {
-        add("testImplementation", platform("org.junit:junit-bom:5.11.4"))
-        add("testImplementation", "org.junit.jupiter:junit-jupiter")
-        add("testRuntimeOnly", "org.junit.platform:junit-platform-launcher")
+        add("testImplementation", platform(junitBom))
+        add("testImplementation", junitJupiter)
+        add("testRuntimeOnly", junitPlatformLauncher)
     }
     extensions.configure<PublishingExtension> {
         publications {

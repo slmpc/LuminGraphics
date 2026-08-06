@@ -1,9 +1,6 @@
 import org.gradle.api.tasks.JavaExec
 import java.time.Duration
 
-val prismGroup = rootProject.extra["prismGroup"] as String
-val prismVersion = rootProject.extra["prismVersion"] as String
-val lwjglVersion = "3.4.1"
 val lwjglNatives = when {
     System.getProperty("os.name").lowercase().contains("win") -> "natives-windows"
     System.getProperty("os.name").lowercase().contains("mac") &&
@@ -14,14 +11,14 @@ val lwjglNatives = when {
 
 dependencies {
     implementation(project(":lumin-graphics-ui"))
-    implementation("$prismGroup:prism-rhi-backend-opengl41:$prismVersion")
-    implementation("$prismGroup:prism-rhi-backend-opengl46:$prismVersion")
-    implementation("$prismGroup:prism-rhi-backend-vulkan:$prismVersion")
-    implementation(platform("org.lwjgl:lwjgl-bom:$lwjglVersion"))
-    implementation("org.lwjgl:lwjgl")
-    implementation("org.lwjgl:lwjgl-glfw")
-    implementation("org.lwjgl:lwjgl-opengl")
-    implementation("org.lwjgl:lwjgl-vulkan")
+    implementation(libs.prism.rhi.backend.opengl41)
+    implementation(libs.prism.rhi.backend.opengl46)
+    implementation(libs.prism.rhi.backend.vulkan)
+    implementation(platform(libs.lwjgl.bom))
+    implementation(libs.lwjgl.core)
+    implementation(libs.lwjgl.glfw)
+    implementation(libs.lwjgl.opengl)
+    implementation(libs.lwjgl.vulkan)
     runtimeOnly("org.lwjgl:lwjgl::$lwjglNatives")
     runtimeOnly("org.lwjgl:lwjgl-glfw::$lwjglNatives")
     runtimeOnly("org.lwjgl:lwjgl-opengl::$lwjglNatives")

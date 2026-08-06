@@ -2,9 +2,9 @@ import org.gradle.api.tasks.compile.JavaCompile
 
 dependencies {
     api(project(":lumin-graphics-render"))
-    api(platform("org.lwjgl:lwjgl-bom:3.4.1"))
-    api("org.lwjgl:lwjgl")
-    api("org.lwjgl:lwjgl-stb")
+    api(platform(libs.lwjgl.bom))
+    api(libs.lwjgl.core)
+    api(libs.lwjgl.stb)
 
     val lwjglNatives = when {
         System.getProperty("os.name").lowercase().contains("win") -> "natives-windows"

@@ -22,8 +22,7 @@ GLSL inputs are `src/main/resources/assets/lumin_graphics/shaders`; generated
 SPIR-V resources are under `build/generated/resources/shaders`.
 
 Run `..\\gradlew.bat :lumin-graphics-render:compileShaders shaderCompileTest`
-for generated artifacts. `shaderGl41Test` and `shaderGl46Test` compile/link in
-hidden OpenGL contexts when native graphics validation is required.
+for generated artifacts and compiler transaction validation.
 
 ## Pitfalls
 

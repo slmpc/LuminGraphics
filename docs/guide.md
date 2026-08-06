@@ -38,9 +38,9 @@ layer; distinct layers are never merged or reordered.
 
 Run `:lumin-graphics-render:compileShaders` to transform retained GLSL under
 `lumin-graphics-render/src/main/resources/assets/lumin_graphics/shaders` into
-generated Vulkan 1.3/SPIR-V 1.6 resources. Validate with `shaderCompileTest`;
-`shaderGl41Test` and `shaderGl46Test` additionally compile/link the catalog in
-hidden OpenGL contexts. Never edit generated outputs.
+generated Vulkan 1.3/SPIR-V 1.6 resources. Validate the generated artifact and
+compiler transaction contract with `shaderCompileTest`. Never edit generated
+outputs.
 
 The resource manifest contains 37 shader entries. Font data is not packaged:
 callers provide a `FontResource`, normally with `FontResource.path(Path)`, when

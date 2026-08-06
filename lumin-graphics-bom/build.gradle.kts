@@ -3,9 +3,6 @@ plugins {
     `maven-publish`
 }
 
-val prismGroup = rootProject.extra["prismGroup"] as String
-val prismVersion = rootProject.extra["prismVersion"] as String
-
 javaPlatform {
     allowDependencies()
 }
@@ -17,11 +14,11 @@ dependencies {
         api(project(":lumin-graphics-text"))
         api(project(":lumin-graphics-ui"))
 
-        api("$prismGroup:prism-rhi-core:$prismVersion")
-        api("$prismGroup:prism-rhi-backend-opengl-common:$prismVersion")
-        api("$prismGroup:prism-rhi-backend-opengl41:$prismVersion")
-        api("$prismGroup:prism-rhi-backend-opengl46:$prismVersion")
-        api("$prismGroup:prism-rhi-backend-vulkan:$prismVersion")
+        api(libs.prism.rhi.core)
+        api(libs.prism.rhi.backend.opengl.common)
+        api(libs.prism.rhi.backend.opengl41)
+        api(libs.prism.rhi.backend.opengl46)
+        api(libs.prism.rhi.backend.vulkan)
     }
 }
 

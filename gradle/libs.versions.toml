@@ -1,0 +1,25 @@
+[versions]
+prism = "0.2.0"
+lwjgl = "3.4.1"
+junit = "5.11.4"
+archunit = "1.4.1"
+
+[libraries]
+prism-rhi-core = { module = "com.github.slmpc.prismrhi:prism-rhi-core", version.ref = "prism" }
+prism-rhi-backend-opengl-common = { module = "com.github.slmpc.prismrhi:prism-rhi-backend-opengl-common", version.ref = "prism" }
+prism-rhi-backend-opengl41 = { module = "com.github.slmpc.prismrhi:prism-rhi-backend-opengl41", version.ref = "prism" }
+prism-rhi-backend-opengl46 = { module = "com.github.slmpc.prismrhi:prism-rhi-backend-opengl46", version.ref = "prism" }
+prism-rhi-backend-vulkan = { module = "com.github.slmpc.prismrhi:prism-rhi-backend-vulkan", version.ref = "prism" }
+prism-rhi-shaderc = { module = "com.github.slmpc.prismrhi:prism-rhi-shaderc", version.ref = "prism" }
+
+lwjgl-bom = { module = "org.lwjgl:lwjgl-bom", version.ref = "lwjgl" }
+lwjgl-core = { module = "org.lwjgl:lwjgl" }
+lwjgl-glfw = { module = "org.lwjgl:lwjgl-glfw" }
+lwjgl-opengl = { module = "org.lwjgl:lwjgl-opengl" }
+lwjgl-stb = { module = "org.lwjgl:lwjgl-stb" }
+lwjgl-vulkan = { module = "org.lwjgl:lwjgl-vulkan" }
+
+junit-bom = { module = "org.junit:junit-bom", version.ref = "junit" }
+junit-jupiter = { module = "org.junit.jupiter:junit-jupiter" }
+junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher" }
+archunit-junit5 = { module = "com.tngtech.archunit:archunit-junit5", version.ref = "archunit" }

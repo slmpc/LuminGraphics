@@ -14,4 +14,6 @@ The columns are:
 - `import_rewrite_status`: `rewrite-required-todo10` for shaders containing `#moj_import`; otherwise `not-applicable`.
 - `target_test_id`: the byte or rewrite contract that owns subsequent verification.
 
-`ResourceManifestTest` compares the shader rows to the live files and checks the import marker set exactly. Font files are caller-owned and are not tracked or packaged. Set `lumin.epsilon.root` for another source checkout or `lumin.resource.manifest` to mutation-test a copy.
+The manifest remains source-relative and records the exact bytes and rewrite
+status for each retained shader. Font files are caller-owned and are not tracked
+or packaged.

@@ -15,4 +15,5 @@ The columns are:
 - `behavioral_test_id`: the contract that must preserve the behavior during implementation.
 - `source_commit`: the exact Epsilon Git commit inventoried by the row.
 
-`MigrationManifestTest` compares the ledger to the live source tree. The deterministic workspace default is `D:/Dev/OpenEpsilon/Epsilon-Private`; set `lumin.epsilon.root` to verify another checkout or `lumin.migration.manifest` to mutation-test a copy.
+The ledger is source-relative and auditable against the Epsilon checkout identified
+by each row's `source_commit`; the Epsilon source tree is not a build dependency.
