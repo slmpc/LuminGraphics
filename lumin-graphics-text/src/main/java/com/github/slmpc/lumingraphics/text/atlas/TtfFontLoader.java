@@ -1,4 +1,5 @@
 package com.github.slmpc.lumingraphics.text.atlas;
+
 import com.github.slmpc.lumingraphics.text.font.FontClosedException;
 import com.github.slmpc.lumingraphics.text.font.FontLoader;
 import com.github.slmpc.lumingraphics.text.font.FontMetrics;
@@ -44,14 +45,14 @@ public final class TtfFontLoader implements FontLoader {
     /**
      * 创建字体 loader。
      *
-     * @param resource 调用方提供的字体字节来源
-     * @param pixelHeight 栅格化像素高度
-     * @param padding 每个字形的额外像素边距
-     * @param atlasWidth 图集页宽度
-     * @param atlasHeight 图集页高度
+     * @param resource      调用方提供的字体字节来源
+     * @param pixelHeight   栅格化像素高度
+     * @param padding       每个字形的额外像素边距
+     * @param atlasWidth    图集页宽度
+     * @param atlasHeight   图集页高度
      * @param maxAtlasPages 最大图集页数
-     * @param uploader 将图集像素上传到后端的实现
-     * @param executor 执行栅格化工作的执行器
+     * @param uploader      将图集像素上传到后端的实现
+     * @param executor      执行栅格化工作的执行器
      */
     public TtfFontLoader(FontResource resource, int pixelHeight, int padding, int atlasWidth, int atlasHeight,
                          int maxAtlasPages, GlyphAtlasUploader uploader, Executor executor) {
@@ -64,8 +65,11 @@ public final class TtfFontLoader implements FontLoader {
         this.executor = Objects.requireNonNull(executor, "executor");
     }
 
-    /** 异步请求一个字形；订阅者可独立取消，重复请求会共享同一栅格化工作。 */
-    @Override public synchronized CompletableFuture<GlyphDescriptor> requestGlyph(int codepoint) {
+    /**
+     * 异步请求一个字形；订阅者可独立取消，重复请求会共享同一栅格化工作。
+     */
+    @Override
+    public synchronized CompletableFuture<GlyphDescriptor> requestGlyph(int codepoint) {
         ensureOpen();
         GlyphDescriptor loaded = glyphs.get(codepoint);
         if (loaded != null) return CompletableFuture.completedFuture(loaded);
@@ -100,7 +104,9 @@ public final class TtfFontLoader implements FontLoader {
         return subscriber;
     }
 
-    private void removePending(int codepoint, PendingRequest request) { pending.remove(codepoint, request); }
+    private void removePending(int codepoint, PendingRequest request) {
+        pending.remove(codepoint, request);
+    }
 
     private synchronized GlyphDescriptor appendGlyph(TtfGlyph glyph, PendingRequest request) {
         ensureOpen();
@@ -141,8 +147,11 @@ public final class TtfFontLoader implements FontLoader {
         return atlas;
     }
 
-    /** 同步取得字形；底层异步失败会按原有运行时异常传播。 */
-    @Override public GlyphDescriptor requireGlyph(int codepoint) {
+    /**
+     * 同步取得字形；底层异步失败会按原有运行时异常传播。
+     */
+    @Override
+    public GlyphDescriptor requireGlyph(int codepoint) {
         try {
             return requestGlyph(codepoint).join();
         } catch (CompletionException error) {
@@ -151,15 +160,46 @@ public final class TtfFontLoader implements FontLoader {
         }
     }
 
-    @Override public synchronized int advance(int codepoint) { ensureOpen(); return font.advance(codepoint); }
-    @Override public synchronized int kerning(int left, int right) { ensureOpen(); return font.kerning(left, right); }
-    @Override public synchronized FontMetrics metrics() { ensureOpen(); return font.metrics(); }
-    @Override public synchronized long glyphRevision() { ensureOpen(); return glyphRevision; }
-    @Override public synchronized long atlasRevision() { ensureOpen(); return atlasRevision; }
-    public int rasterizationCount() { return rasterizationCount.get(); }
-    private void ensureOpen() { if (closed) throw new FontClosedException("Font loader is closed"); }
+    @Override
+    public synchronized int advance(int codepoint) {
+        ensureOpen();
+        return font.advance(codepoint);
+    }
 
-    @Override public synchronized void close() {
+    @Override
+    public synchronized int kerning(int left, int right) {
+        ensureOpen();
+        return font.kerning(left, right);
+    }
+
+    @Override
+    public synchronized FontMetrics metrics() {
+        ensureOpen();
+        return font.metrics();
+    }
+
+    @Override
+    public synchronized long glyphRevision() {
+        ensureOpen();
+        return glyphRevision;
+    }
+
+    @Override
+    public synchronized long atlasRevision() {
+        ensureOpen();
+        return atlasRevision;
+    }
+
+    public int rasterizationCount() {
+        return rasterizationCount.get();
+    }
+
+    private void ensureOpen() {
+        if (closed) throw new FontClosedException("Font loader is closed");
+    }
+
+    @Override
+    public synchronized void close() {
         if (closed) return;
         closed = true;
         List<PendingRequest> pendingSnapshot = List.copyOf(pending.values());
@@ -171,12 +211,18 @@ public final class TtfFontLoader implements FontLoader {
         pendingSnapshot.forEach(request -> request.close(closedError));
         RuntimeException failure = null;
         for (int index = atlasSnapshot.size() - 1; index >= 0; index--) {
-            try { atlasSnapshot.get(index).close(); } catch (RuntimeException error) {
-                if (failure == null) failure = error; else failure.addSuppressed(error);
+            try {
+                atlasSnapshot.get(index).close();
+            } catch (RuntimeException error) {
+                if (failure == null) failure = error;
+                else failure.addSuppressed(error);
             }
         }
-        try { font.close(); } catch (RuntimeException error) {
-            if (failure == null) failure = error; else failure.addSuppressed(error);
+        try {
+            font.close();
+        } catch (RuntimeException error) {
+            if (failure == null) failure = error;
+            else failure.addSuppressed(error);
         }
         if (failure != null) throw failure;
     }
@@ -191,7 +237,10 @@ public final class TtfFontLoader implements FontLoader {
         private GlyphDescriptor terminalGlyph;
         private Throwable terminalError;
 
-        private PendingRequest(int codepoint) { this.codepoint = codepoint; }
+        private PendingRequest(int codepoint) {
+            this.codepoint = codepoint;
+        }
+
         CompletableFuture<GlyphDescriptor> subscribe() {
             commitLock.lock();
             try {
@@ -204,7 +253,11 @@ public final class TtfFontLoader implements FontLoader {
                 commitLock.unlock();
             }
         }
-        boolean isCancelled() { return task.isCancelled(); }
+
+        boolean isCancelled() {
+            return task.isCancelled();
+        }
+
         boolean beginCommit() {
             commitLock.lock();
             if (task.isCancelled() || subscribers.isEmpty()) {
@@ -214,7 +267,11 @@ public final class TtfFontLoader implements FontLoader {
             committed = true;
             return true;
         }
-        void finishCommit() { if (commitLock.isHeldByCurrentThread()) commitLock.unlock(); }
+
+        void finishCommit() {
+            if (commitLock.isHeldByCurrentThread()) commitLock.unlock();
+        }
+
         void complete(GlyphDescriptor glyph) {
             commitLock.lock();
             try {
@@ -226,6 +283,7 @@ public final class TtfFontLoader implements FontLoader {
                 commitLock.unlock();
             }
         }
+
         void completeExceptionally(Throwable error) {
             commitLock.lock();
             try {
@@ -237,6 +295,7 @@ public final class TtfFontLoader implements FontLoader {
                 commitLock.unlock();
             }
         }
+
         boolean cancel(SubscriberFuture subscriber, boolean mayInterrupt) {
             commitLock.lock();
             try {
@@ -251,6 +310,7 @@ public final class TtfFontLoader implements FontLoader {
                 commitLock.unlock();
             }
         }
+
         void close(FontClosedException error) {
             completeExceptionally(error);
             task.cancel(true);
@@ -260,10 +320,17 @@ public final class TtfFontLoader implements FontLoader {
     private static final class SubscriberFuture extends CompletableFuture<GlyphDescriptor> {
         private final PendingRequest owner;
 
-        private SubscriberFuture(PendingRequest owner) { this.owner = owner; }
-        @Override public boolean cancel(boolean mayInterruptIfRunning) {
+        private SubscriberFuture(PendingRequest owner) {
+            this.owner = owner;
+        }
+
+        @Override
+        public boolean cancel(boolean mayInterruptIfRunning) {
             return owner.cancel(this, mayInterruptIfRunning);
         }
-        private boolean cancelDirect(boolean mayInterruptIfRunning) { return super.cancel(mayInterruptIfRunning); }
+
+        private boolean cancelDirect(boolean mayInterruptIfRunning) {
+            return super.cancel(mayInterruptIfRunning);
+        }
     }
 }

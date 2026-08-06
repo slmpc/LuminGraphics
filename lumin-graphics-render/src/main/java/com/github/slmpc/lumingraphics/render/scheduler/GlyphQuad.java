@@ -8,5 +8,8 @@ public record GlyphQuad(Render2DBounds bounds, float u0, float v0, float u1, flo
             throw new IllegalArgumentException("glyph data is invalid");
         }
     }
-    private static boolean unit(float value) { return Float.isFinite(value) && value >= 0 && value <= 1; }
+
+    private static boolean unit(float value) {
+        return Float.isFinite(value) && value >= 0 && value <= 1;
+    }
 }

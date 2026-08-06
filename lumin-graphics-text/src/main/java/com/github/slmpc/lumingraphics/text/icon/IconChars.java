@@ -1,6 +1,8 @@
 package com.github.slmpc.lumingraphics.text.icon;
 
-/** MIG-TEXT-ICON-CHARS */
+/**
+ * MIG-TEXT-ICON-CHARS
+ */
 public class IconChars {
 
 

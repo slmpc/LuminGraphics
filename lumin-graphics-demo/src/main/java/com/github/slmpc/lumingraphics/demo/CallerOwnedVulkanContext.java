@@ -20,7 +20,9 @@ import static org.lwjgl.vulkan.KHRSwapchain.VK_KHR_SWAPCHAIN_EXTENSION_NAME;
 import static org.lwjgl.vulkan.VK10.*;
 import static org.lwjgl.vulkan.VK13.*;
 
-/** Full Vulkan instance/device/queue/surface fixture whose lifetime belongs to the demo. */
+/**
+ * Full Vulkan instance/device/queue/surface fixture whose lifetime belongs to the demo.
+ */
 final class CallerOwnedVulkanContext implements AutoCloseable {
     private final int width;
     private final int height;
@@ -70,14 +72,26 @@ final class CallerOwnedVulkanContext implements AutoCloseable {
                 .contextIdentity(new RhiContextIdentity(window, "lumin-vulkan-smoke"))
                 .invalidation(invalidation)
                 .surface(new VulkanExternalContext.Surface(surface, width, height))
-                .synchronization(() -> { })
+                .synchronization(() -> {
+                })
                 .build();
     }
 
-    String deviceName() { return deviceName; }
-    int apiVersion() { return apiVersion; }
-    int queueFamily() { return queueFamily; }
-    boolean closed() { return closed; }
+    String deviceName() {
+        return deviceName;
+    }
+
+    int apiVersion() {
+        return apiVersion;
+    }
+
+    int queueFamily() {
+        return queueFamily;
+    }
+
+    boolean closed() {
+        return closed;
+    }
 
     void copyImageToBuffer(long image, long buffer) {
         try (MemoryStack stack = MemoryStack.stackPush()) {
@@ -217,13 +231,27 @@ final class CallerOwnedVulkanContext implements AutoCloseable {
         queue = new VkQueue(queuePointer.get(0), device);
     }
 
-    @Override public void close() {
+    @Override
+    public void close() {
         if (closed) return;
         invalidation.invalidate();
-        if (device != null) { vkDeviceWaitIdle(device); vkDestroyDevice(device, null); device = null; }
-        if (instance != null && surface != NULL) { vkDestroySurfaceKHR(instance, surface, null); surface = NULL; }
-        if (instance != null) { vkDestroyInstance(instance, null); instance = null; }
-        if (window != NULL) { glfwDestroyWindow(window); window = NULL; }
+        if (device != null) {
+            vkDeviceWaitIdle(device);
+            vkDestroyDevice(device, null);
+            device = null;
+        }
+        if (instance != null && surface != NULL) {
+            vkDestroySurfaceKHR(instance, surface, null);
+            surface = NULL;
+        }
+        if (instance != null) {
+            vkDestroyInstance(instance, null);
+            instance = null;
+        }
+        if (window != NULL) {
+            glfwDestroyWindow(window);
+            window = NULL;
+        }
         glfwTerminate();
         closed = true;
     }

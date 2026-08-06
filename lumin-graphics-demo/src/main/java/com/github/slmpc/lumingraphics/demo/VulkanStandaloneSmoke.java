@@ -51,12 +51,15 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-/** Real Vulkan render/readback/present path driven through the public Lumin renderer. */
+/**
+ * Real Vulkan render/readback/present path driven through the public Lumin renderer.
+ */
 final class VulkanStandaloneSmoke {
     private static final int WIDTH = StandaloneRenderAdapter.WIDTH;
     private static final int HEIGHT = StandaloneRenderAdapter.HEIGHT;
 
-    private VulkanStandaloneSmoke() { }
+    private VulkanStandaloneSmoke() {
+    }
 
     static void run(Path evidence, FontResource font) throws Exception {
         Files.createDirectories(evidence);
@@ -216,21 +219,24 @@ final class VulkanStandaloneSmoke {
         BufferedImage image = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_ARGB);
         java.util.Set<Integer> colors = new java.util.HashSet<>();
         int nonblank = 0, minX = WIDTH, minY = HEIGHT, maxX = -1, maxY = -1;
-        for (int y = 0; y < HEIGHT; y++) for (int x = 0; x < WIDTH; x++) {
-            int i = (y * WIDTH + x) * 4;
-            int b = Byte.toUnsignedInt(pixels[i]);
-            int g = Byte.toUnsignedInt(pixels[i + 1]);
-            int r = Byte.toUnsignedInt(pixels[i + 2]);
-            int a = Byte.toUnsignedInt(pixels[i + 3]);
-            int rgb = (r << 16) | (g << 8) | b;
-            colors.add(rgb);
-            if (r + g + b > 32) {
-                nonblank++;
-                minX = Math.min(minX, x); minY = Math.min(minY, y);
-                maxX = Math.max(maxX, x); maxY = Math.max(maxY, y);
+        for (int y = 0; y < HEIGHT; y++)
+            for (int x = 0; x < WIDTH; x++) {
+                int i = (y * WIDTH + x) * 4;
+                int b = Byte.toUnsignedInt(pixels[i]);
+                int g = Byte.toUnsignedInt(pixels[i + 1]);
+                int r = Byte.toUnsignedInt(pixels[i + 2]);
+                int a = Byte.toUnsignedInt(pixels[i + 3]);
+                int rgb = (r << 16) | (g << 8) | b;
+                colors.add(rgb);
+                if (r + g + b > 32) {
+                    nonblank++;
+                    minX = Math.min(minX, x);
+                    minY = Math.min(minY, y);
+                    maxX = Math.max(maxX, x);
+                    maxY = Math.max(maxY, y);
+                }
+                image.setRGB(x, y, (a << 24) | rgb);
             }
-            image.setRGB(x, y, (a << 24) | rgb);
-        }
         ImageIO.write(image, "png", path.toFile());
         return new Metrics(nonblank, colors.size(), minX, minY, maxX, maxY);
     }
@@ -255,6 +261,9 @@ final class VulkanStandaloneSmoke {
                 + ",\n  \"categories\": {\n" + categories + "  },\n  \"presented\": true,\n  \"cleanup\": true\n}\n";
     }
 
-    private record Variant(byte[] pixels, StandaloneRenderAdapter.Trace trace) { }
-    private record Metrics(int nonblank, int colors, int minX, int minY, int maxX, int maxY) { }
+    private record Variant(byte[] pixels, StandaloneRenderAdapter.Trace trace) {
+    }
+
+    private record Metrics(int nonblank, int colors, int minX, int minY, int maxX, int maxY) {
+    }
 }

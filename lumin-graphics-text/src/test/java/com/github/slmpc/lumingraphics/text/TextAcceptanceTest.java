@@ -1,4 +1,5 @@
 package com.github.slmpc.lumingraphics.text;
+
 import com.github.slmpc.lumingraphics.text.font.FontClosedException;
 import com.github.slmpc.lumingraphics.text.font.FontResource;
 import com.github.slmpc.lumingraphics.text.ttf.TtfFontFile;
@@ -15,6 +16,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+
 import org.junit.jupiter.api.Test;
 
 class TextAcceptanceTest {
@@ -54,15 +56,19 @@ class TextAcceptanceTest {
             assertEquals(first.batches(), submitted);
             renderer.clear();
         }
-        TtfTextRenderer closed = new TtfTextRenderer(ignored -> {});
+        TtfTextRenderer closed = new TtfTextRenderer(ignored -> {
+        });
         closed.close();
         assertThrows(FontClosedException.class, closed::draw);
     }
 
     private static final class TraceUploader implements GlyphAtlasUploader {
         private final AtomicInteger next = new AtomicInteger();
-        @Override public GlyphAtlasUpload upload(AtlasPixels pixels) {
-            return new GlyphAtlasUpload("trace-" + next.incrementAndGet(), () -> {});
+
+        @Override
+        public GlyphAtlasUpload upload(AtlasPixels pixels) {
+            return new GlyphAtlasUpload("trace-" + next.incrementAndGet(), () -> {
+            });
         }
     }
 }

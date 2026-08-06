@@ -5,7 +5,9 @@ import com.github.slmpc.lumingraphics.render.scheduler.Render2DTexture;
 import java.nio.ByteBuffer;
 import java.util.Objects;
 
-/** Describes one fullscreen-effect input and its effect-specific dynamic uniform payload. */
+/**
+ * Describes one fullscreen-effect input and its effect-specific dynamic uniform payload.
+ */
 public record FullscreenEffectRequest(String pipelineId, Render2DTexture input, ByteBuffer uniforms) {
     public FullscreenEffectRequest {
         if (pipelineId == null || pipelineId.isBlank()) {
@@ -18,7 +20,8 @@ public record FullscreenEffectRequest(String pipelineId, Render2DTexture input, 
         uniforms = copy.asReadOnlyBuffer().order(copy.order());
     }
 
-    @Override public ByteBuffer uniforms() {
+    @Override
+    public ByteBuffer uniforms() {
         return uniforms.asReadOnlyBuffer().order(uniforms.order());
     }
 }

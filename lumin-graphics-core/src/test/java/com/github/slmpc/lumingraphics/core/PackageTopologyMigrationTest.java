@@ -250,7 +250,8 @@ class PackageTopologyMigrationTest {
         }
     }
 
-    private enum Stage { BASELINE, FINAL }
+    private enum Stage {BASELINE, FINAL}
 
-    private record Move(String oldFqn, String newFqn) { }
+    private record Move(String oldFqn, String newFqn) {
+    }
 }

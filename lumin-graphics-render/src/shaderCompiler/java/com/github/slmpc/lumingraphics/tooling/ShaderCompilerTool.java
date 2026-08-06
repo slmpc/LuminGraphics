@@ -29,7 +29,8 @@ public final class ShaderCompilerTool {
         if (args.length != 2) {
             throw new IllegalArgumentException("usage: ShaderCompilerTool <source-dir> <resource-output-dir>");
         }
-        run(Path.of(args[0]), Path.of(args[1]), () -> { });
+        run(Path.of(args[0]), Path.of(args[1]), () -> {
+        });
     }
 
     static void run(Path sourcePath, Path outputPath,

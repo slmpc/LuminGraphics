@@ -20,9 +20,7 @@ import java.security.MessageDigest;
 import java.util.HexFormat;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 class ShaderArtifactTest {
     private static final Path ROOT = locateRoot();
@@ -65,7 +63,7 @@ class ShaderArtifactTest {
                 "completion marker does not bind the generated manifest");
         try (Stream<Path> siblings = Files.list(GENERATED.getParent())) {
             assertTrue(siblings.map(path -> path.getFileName().toString())
-                    .noneMatch(name -> name.equals("shaders.backup") || name.startsWith("shaders.staging-")),
+                            .noneMatch(name -> name.equals("shaders.backup") || name.startsWith("shaders.staging-")),
                     "generated shader transaction directory remains");
         }
         Map<String, String> generatedSourceHashes = generatedManifest.stream().skip(1)
@@ -169,7 +167,7 @@ class ShaderArtifactTest {
         var shader = LuminPipelineCatalog.require("rectangle").vertex();
         byte[] source = remaining(ShaderArtifactLibrary.load(shader, RhiShaderBinaryFormat.OPENGL_SOURCE));
         byte[] spirv = remaining(ShaderArtifactLibrary.load(shader, RhiShaderBinaryFormat.SPIRV));
-        assertTrue(Arrays.equals(source, Files.readAllBytes(RESOURCES.resolve("assets/lumin_graphics/shaders/rectangle.vsh"))));
+        assertArrayEquals(source, Files.readAllBytes(RESOURCES.resolve("assets/lumin_graphics/shaders/rectangle.vsh")));
         validateSpirv(shader.spirvPath(), spirv);
     }
 
@@ -180,8 +178,7 @@ class ShaderArtifactTest {
         LuminPipelineCatalog.entries().forEach(entry -> assertTrue(supported.contains(entry.topology().name()),
                 entry.id() + " uses topology unsupported by Prism: " + entry.topology()));
         LuminPipelineCatalog.entries().forEach(entry -> {
-            assertTrue(entry.topology() == RhiPrimitiveTopology.TRIANGLE_LIST,
-                    entry.id() + " must use triangle-list submission");
+            assertSame(entry.topology(), RhiPrimitiveTopology.TRIANGLE_LIST, entry.id() + " must use triangle-list submission");
             assertTrue(entry.drawAbi().cpuTransformedPositions(), entry.id() + " needs CPU-transformed positions");
         });
     }
@@ -192,16 +189,14 @@ class ShaderArtifactTest {
         try (Stream<Path> paths = Files.walk(tree)) {
             for (Path path : paths.toList()) {
                 String relative = tree.relativize(path).toString().replace('\\', '/');
-                assertTrue(!relative.toLowerCase().contains("minecraft"), "legacy target path: " + relative);
+                assertFalse(relative.toLowerCase().contains("minecraft"), "legacy target path: " + relative);
                 if (Files.isRegularFile(path)) {
                     String source = Files.readString(path);
-                    assertTrue(!source.matches("(?s).*((?i:\\bminecraft\\b|\\bmojang\\b)|\\bEpsilon\\b).*"),
-                            "legacy target token: " + relative);
+                    assertFalse(source.matches("(?s).*((?i:\\bminecraft\\b|\\bmojang\\b)|\\bEpsilon\\b).*"), "legacy target token: " + relative);
                 }
             }
         }
-        assertTrue(!LuminPipelineCatalog.entries().toString().toLowerCase().contains("minecraft"),
-                "legacy token remains in pipeline catalog");
+        assertFalse(LuminPipelineCatalog.entries().toString().toLowerCase().contains("minecraft"), "legacy token remains in pipeline catalog");
     }
 
     @Test
@@ -232,7 +227,9 @@ class ShaderArtifactTest {
 
     private static void validateCoverage(Set<String> expected, Set<String> covered) {
         expected.stream().filter(path -> !covered.contains(path)).findFirst()
-                .ifPresent(path -> { throw new IllegalArgumentException("catalog orphan: " + path); });
+                .ifPresent(path -> {
+                    throw new IllegalArgumentException("catalog orphan: " + path);
+                });
     }
 
     private static void validateSpirv(String name, byte[] bytes) {
@@ -256,7 +253,7 @@ class ShaderArtifactTest {
                 mainEntry |= main;
                 if (main) {
                     stageMatches = name.contains(".vsh") ? executionModel == 0
-                            : name.contains(".fsh") ? executionModel == 4 : true;
+                            : !name.contains(".fsh") || executionModel == 4;
                 }
             }
             index += wordCount;
@@ -291,7 +288,8 @@ class ShaderArtifactTest {
     }
 
     private static int indexOf(byte[] bytes, byte[] needle) {
-        outer: for (int i = 0; i <= bytes.length - needle.length; i++) {
+        outer:
+        for (int i = 0; i <= bytes.length - needle.length; i++) {
             for (int j = 0; j < needle.length; j++) if (bytes[i + j] != needle[j]) continue outer;
             return i;
         }

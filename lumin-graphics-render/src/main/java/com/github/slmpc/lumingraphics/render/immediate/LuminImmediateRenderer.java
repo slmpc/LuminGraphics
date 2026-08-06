@@ -7,7 +7,9 @@ import com.github.slmpc.lumingraphics.render.resource.RenderResources;
 import com.github.slmpc.lumingraphics.render.scheduler.Render2DTexture;
 import com.github.slmpc.prismrhi.descriptor.RhiDescriptorSet;
 
-/** Uploads immediate CPU vertex batches and records explicit Prism draw commands. */
+/**
+ * Uploads immediate CPU vertex batches and records explicit Prism draw commands.
+ */
 public final class LuminImmediateRenderer implements AutoCloseable {
     private final LuminRingBuffer ring;
     private final int bytesPerSlot;
@@ -51,7 +53,12 @@ public final class LuminImmediateRenderer implements AutoCloseable {
         if (ring.frameActive()) ring.endFrame();
     }
 
-    public boolean frameActive() { return ring.frameActive(); }
+    public boolean frameActive() {
+        return ring.frameActive();
+    }
 
-    @Override public void close() { ring.close(); }
+    @Override
+    public void close() {
+        ring.close();
+    }
 }

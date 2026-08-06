@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+
 import org.junit.jupiter.api.Test;
 
 class ResourceManifestTest {
@@ -49,9 +50,9 @@ class ResourceManifestTest {
         assertTrue(rows.stream().allMatch(row -> row.get("source_commit").equals(actualHead)),
                 "Resource provenance must match actual Epsilon HEAD " + actualHead);
         Set<String> markedImports = rows.stream()
-                        .filter(row -> row.get("import_rewrite_status").equals("rewrite-required-todo10"))
-                        .map(row -> row.get("source"))
-                        .collect(Collectors.toSet());
+                .filter(row -> row.get("import_rewrite_status").equals("rewrite-required-todo10"))
+                .map(row -> row.get("source"))
+                .collect(Collectors.toSet());
         assertEquals(actualMojImportShaders(), markedImports,
                 "Marked import rewrites must equal shaders that actually contain #moj_import");
         assertEquals(9, markedImports.size(), "Exactly nine #moj_import shader files must be marked for rewrite");
@@ -76,8 +77,7 @@ class ResourceManifestTest {
                     "Resource target must not retain epsilon namespace: " + row.get("target"));
             assertTrue(row.get("sha256").matches("[0-9a-f]{64}"),
                     "Resource SHA-256 must be lowercase hexadecimal: " + row.get("source"));
-            assertTrue(row.get("provenance_status").equals("source-repository; license-review-required"),
-                    "Resource provenance/license status must be honest and explicit");
+            assertEquals("source-repository; license-review-required", row.get("provenance_status"), "Resource provenance/license status must be honest and explicit");
             assertTrue(Set.of("not-applicable", "rewrite-required-todo10")
                             .contains(row.get("import_rewrite_status")),
                     "Invalid import rewrite status: " + row.get("import_rewrite_status"));

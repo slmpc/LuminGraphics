@@ -26,6 +26,7 @@ public final class ResourceRegistry implements AutoCloseable {
 
     /**
      * 创建与给定 Prism 上下文绑定的注册表。
+     *
      * @param contextIdentity 所有登记资源必须匹配的上下文标识
      */
     public ResourceRegistry(RhiContextIdentity contextIdentity) {
@@ -38,11 +39,11 @@ public final class ResourceRegistry implements AutoCloseable {
     /**
      * 登记一个资源。
      *
-     * @param name 调试和查找用的非空白唯一名称
-     * @param resource 调用方已经创建的 Prism 资源
-     * @param ownership 资源关闭职责
+     * @param name              调试和查找用的非空白唯一名称
+     * @param resource          调用方已经创建的 Prism 资源
+     * @param ownership         资源关闭职责
      * @param invalidationToken 与资源上下文关联的失效令牌
-     * @param <T> 已登记 Prism 资源的具体类型
+     * @param <T>               已登记 Prism 资源的具体类型
      * @return 包含所有权和有效性检查的资源包装器
      */
     public synchronized <T extends RhiResource> ManagedResource<T> register(
@@ -65,13 +66,16 @@ public final class ResourceRegistry implements AutoCloseable {
 
     /**
      * 返回当前登记资源数。
+     *
      * @return 已登记资源数
      */
     public synchronized int size() {
         return resources.size();
     }
 
-    /** 标记全部已登记资源为失效，但不关闭它们。 */
+    /**
+     * 标记全部已登记资源为失效，但不关闭它们。
+     */
     public synchronized void invalidateAll() {
         requireOpen();
         resources.values().forEach(ManagedResource::invalidate);

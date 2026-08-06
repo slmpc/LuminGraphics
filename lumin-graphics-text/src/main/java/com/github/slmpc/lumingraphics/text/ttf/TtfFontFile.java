@@ -1,4 +1,5 @@
 package com.github.slmpc.lumingraphics.text.ttf;
+
 import com.github.slmpc.lumingraphics.text.font.FontClosedException;
 import com.github.slmpc.lumingraphics.text.font.FontMalformedException;
 import com.github.slmpc.lumingraphics.text.font.FontMetrics;
@@ -8,12 +9,15 @@ import com.github.slmpc.lumingraphics.text.font.MissingGlyphException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
+
 import org.lwjgl.stb.STBTTFontinfo;
 import org.lwjgl.stb.STBTruetype;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
 
-/** MIG-TEXT-TTF-FILE */
+/**
+ * MIG-TEXT-TTF-FILE
+ */
 public final class TtfFontFile implements AutoCloseable {
     private final ByteBuffer data;
     private final STBTTFontinfo info;
@@ -65,7 +69,8 @@ public final class TtfFontFile implements AutoCloseable {
     }
 
     private static void validateSfnt(byte[] bytes, int offset, String source) {
-        if (offset < 0 || offset > bytes.length - 12) throw new FontMalformedException("Truncated sfnt header: " + source);
+        if (offset < 0 || offset > bytes.length - 12)
+            throw new FontMalformedException("Truncated sfnt header: " + source);
         int tableCount = u16(bytes, offset + 4);
         long directoryEnd = (long) offset + 12L + tableCount * 16L;
         if (tableCount == 0 || directoryEnd > bytes.length) {
@@ -100,8 +105,15 @@ public final class TtfFontFile implements AutoCloseable {
         }
     }
 
-    public synchronized float scale() { ensureOpen(); return scale; }
-    public synchronized FontMetrics metrics() { ensureOpen(); return metrics; }
+    public synchronized float scale() {
+        ensureOpen();
+        return scale;
+    }
+
+    public synchronized FontMetrics metrics() {
+        ensureOpen();
+        return metrics;
+    }
 
     public synchronized boolean hasGlyph(int codepoint) {
         ensureOpen();
@@ -118,14 +130,15 @@ public final class TtfFontFile implements AutoCloseable {
     }
 
     public synchronized int kerning(int left, int right) {
-        ensureGlyph(left); ensureGlyph(right);
+        ensureGlyph(left);
+        ensureGlyph(right);
         return Math.round(STBTruetype.stbtt_GetCodepointKernAdvance(info, left, right) * scale);
     }
 
     public synchronized int measureAdvance(String text) {
         ensureOpen();
         int width = 0, previous = -1;
-        for (int offset = 0; offset < text.length();) {
+        for (int offset = 0; offset < text.length(); ) {
             int codepoint = text.codePointAt(offset);
             offset += Character.charCount(codepoint);
             if (previous >= 0) width += kerning(previous, codepoint);
@@ -160,9 +173,12 @@ public final class TtfFontFile implements AutoCloseable {
         if (!hasGlyph(codepoint)) throw new MissingGlyphException(codepoint);
     }
 
-    private void ensureOpen() { if (closed) throw new FontClosedException("TTF font is closed"); }
+    private void ensureOpen() {
+        if (closed) throw new FontClosedException("TTF font is closed");
+    }
 
-    @Override public synchronized void close() {
+    @Override
+    public synchronized void close() {
         if (!closed) {
             closed = true;
             info.free();

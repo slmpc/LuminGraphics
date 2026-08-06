@@ -1,4 +1,5 @@
 package com.github.slmpc.lumingraphics.text.layout;
+
 import com.github.slmpc.lumingraphics.text.font.FontClosedException;
 import com.github.slmpc.lumingraphics.text.font.FontLoader;
 import com.github.slmpc.lumingraphics.text.atlas.GlyphDescriptor;
@@ -14,7 +15,8 @@ import java.util.Map;
 public final class TextLayoutEngine implements AutoCloseable {
     private static final int CACHE_LIMIT = 128;
     private final Map<LayoutKey, CachedLayout> cache = new LinkedHashMap<>(32, 0.75f, true) {
-        @Override protected boolean removeEldestEntry(Map.Entry<LayoutKey, CachedLayout> eldest) {
+        @Override
+        protected boolean removeEldestEntry(Map.Entry<LayoutKey, CachedLayout> eldest) {
             return size() > CACHE_LIMIT;
         }
     };
@@ -24,7 +26,7 @@ public final class TextLayoutEngine implements AutoCloseable {
         validate(text, scale, font);
         float maxWidth = 0, lineWidth = 0;
         int previous = -1, lines = 1;
-        for (int offset = 0; offset < text.length();) {
+        for (int offset = 0; offset < text.length(); ) {
             int codepoint = text.codePointAt(offset);
             offset += Character.charCount(codepoint);
             if (codepoint == '\n') {
@@ -54,7 +56,7 @@ public final class TextLayoutEngine implements AutoCloseable {
         int previous = -1;
         int glyphCount = 0;
         long hash = 0xcbf29ce484222325L;
-        for (int offset = 0; offset < text.length();) {
+        for (int offset = 0; offset < text.length(); ) {
             int codepoint = text.codePointAt(offset);
             offset += Character.charCount(codepoint);
             if (codepoint == '\n') {
@@ -99,7 +101,9 @@ public final class TextLayoutEngine implements AutoCloseable {
             return List.copyOf(batches);
         } catch (RuntimeException | Error failure) {
             for (int index = batches.size() - 1; index >= 0; index--) {
-                try { batches.get(index).close(); } catch (RuntimeException | Error cleanupFailure) {
+                try {
+                    batches.get(index).close();
+                } catch (RuntimeException | Error cleanupFailure) {
                     failure.addSuppressed(cleanupFailure);
                 }
             }
@@ -107,9 +111,12 @@ public final class TextLayoutEngine implements AutoCloseable {
         }
     }
 
-    public synchronized void clear() { cache.clear(); }
+    public synchronized void clear() {
+        cache.clear();
+    }
 
-    @Override public synchronized void close() {
+    @Override
+    public synchronized void close() {
         if (!closed) {
             closed = true;
             cache.clear();
@@ -129,14 +136,19 @@ public final class TextLayoutEngine implements AutoCloseable {
         return hash;
     }
 
-    private static long mix(long hash, int value) { return (hash ^ (value & 0xffffffffL)) * 0x100000001b3L; }
+    private static long mix(long hash, int value) {
+        return (hash ^ (value & 0xffffffffL)) * 0x100000001b3L;
+    }
+
     private static void validate(String text, float scale, FontLoader font) {
         if (text == null || font == null) throw new NullPointerException();
-        if (!Float.isFinite(scale) || scale <= 0) throw new IllegalArgumentException("scale must be positive and finite");
+        if (!Float.isFinite(scale) || scale <= 0)
+            throw new IllegalArgumentException("scale must be positive and finite");
     }
 
     private record LayoutKey(TtfFontLoader font, String text, float x, float y, float scale,
-                             long glyphRevision, long atlasRevision) {}
+                             long glyphRevision, long atlasRevision) {
+    }
 
     private record CachedLayout(float width, float height, int glyphCount, long glyphRevision, long atlasRevision,
                                 long stableHash, Map<TtfGlyphAtlas, List<GlyphPlacement>> groups) {

@@ -9,20 +9,30 @@ import com.github.slmpc.lumingraphics.core.geometry.SurfaceMetrics;
 import java.util.Objects;
 import java.util.function.Supplier;
 
-/** 将 UI 逻辑坐标中的 Scissor 转为当前 framebuffer 坐标。 */
+/**
+ * 将 UI 逻辑坐标中的 Scissor 转为当前 framebuffer 坐标。
+ */
 public interface Render2DScissorMapper {
-    /** 返回用于逻辑坐标裁剪和空间索引的视口。 */
+    /**
+     * 返回用于逻辑坐标裁剪和空间索引的视口。
+     */
     Render2DBounds viewport(int framebufferWidth, int framebufferHeight);
 
-    /** 返回 framebuffer 坐标中的 Scissor；完全位于 framebuffer 外时返回 null。 */
+    /**
+     * 返回 framebuffer 坐标中的 Scissor；完全位于 framebuffer 外时返回 null。
+     */
     Render2DScissor toFramebuffer(Render2DScissor logical, int framebufferWidth, int framebufferHeight);
 
-    /** 保持既有直接使用 framebuffer 坐标的 scheduler 行为。 */
+    /**
+     * 保持既有直接使用 framebuffer 坐标的 scheduler 行为。
+     */
     static Render2DScissorMapper identity() {
         return IdentityHolder.INSTANCE;
     }
 
-    /** 使用当前 surface 指标，将左上角原点的 UI 逻辑坐标映射到 OpenGL framebuffer。 */
+    /**
+     * 使用当前 surface 指标，将左上角原点的 UI 逻辑坐标映射到 OpenGL framebuffer。
+     */
     static Render2DScissorMapper topLeft(Supplier<SurfaceMetrics> metricsSupplier) {
         Objects.requireNonNull(metricsSupplier, "metricsSupplier");
         return new Render2DScissorMapper() {
@@ -69,6 +79,7 @@ public interface Render2DScissorMapper {
             }
         };
 
-        private IdentityHolder() { }
+        private IdentityHolder() {
+        }
     }
 }

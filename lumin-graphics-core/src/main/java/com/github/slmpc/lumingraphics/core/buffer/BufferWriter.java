@@ -5,7 +5,9 @@ import com.github.slmpc.lumingraphics.core.exception.LuminValidationException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
-/** Bounds-checked little-endian writer for backend-neutral vertex data. */
+/**
+ * Bounds-checked little-endian writer for backend-neutral vertex data.
+ */
 public final class BufferWriter {
     private final ByteBuffer buffer;
 

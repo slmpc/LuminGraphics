@@ -7,6 +7,7 @@ import com.github.slmpc.lumingraphics.render.immediate.VertexBatch;
 import com.github.slmpc.lumingraphics.render.scheduler.Render2DCommand;
 import com.github.slmpc.lumingraphics.render.scheduler.Render2DTexture;
 import com.github.slmpc.prismrhi.descriptor.RhiDescriptorSet;
+
 import java.util.List;
 
 abstract class AbstractRenderer<C extends Render2DCommand> implements Renderer {
@@ -20,11 +21,18 @@ abstract class AbstractRenderer<C extends Render2DCommand> implements Renderer {
         this.pipeline = pipeline;
     }
 
-    @Override public final void beginFrame(RenderExecution execution) { immediate.beginFrame(execution); }
-    @Override public final void render(Render2DCommand command, RenderExecution execution) {
+    @Override
+    public final void beginFrame(RenderExecution execution) {
+        immediate.beginFrame(execution);
+    }
+
+    @Override
+    public final void render(Render2DCommand command, RenderExecution execution) {
         renderBatch(List.of(command), execution);
     }
-    @Override public final void renderBatch(List<Render2DCommand> commands, RenderExecution execution) {
+
+    @Override
+    public final void renderBatch(List<Render2DCommand> commands, RenderExecution execution) {
         if (commands == null || commands.isEmpty() || commands.stream().anyMatch(command -> !commandType.isInstance(command)))
             throw new IllegalArgumentException("renderer command kind mismatch");
         List<C> typed = commands.stream().map(commandType::cast).toList();
@@ -37,10 +45,29 @@ abstract class AbstractRenderer<C extends Render2DCommand> implements Renderer {
             immediate.drawWithDescriptor(vertices, pipeline, descriptor, execution);
         }
     }
+
     protected abstract VertexBatch vertices(C command);
-    protected Render2DTexture texture(C command) { return null; }
-    protected RhiDescriptorSet descriptor(C command, RenderExecution execution) { return null; }
-    @Override public final void endFrame() { immediate.endFrame(); }
-    @Override public final boolean frameActive() { return immediate.frameActive(); }
-    @Override public final void close() { immediate.close(); }
+
+    protected Render2DTexture texture(C command) {
+        return null;
+    }
+
+    protected RhiDescriptorSet descriptor(C command, RenderExecution execution) {
+        return null;
+    }
+
+    @Override
+    public final void endFrame() {
+        immediate.endFrame();
+    }
+
+    @Override
+    public final boolean frameActive() {
+        return immediate.frameActive();
+    }
+
+    @Override
+    public final void close() {
+        immediate.close();
+    }
 }

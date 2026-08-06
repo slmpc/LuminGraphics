@@ -1,4 +1,5 @@
 package com.github.slmpc.lumingraphics.text.atlas;
+
 import com.github.slmpc.lumingraphics.text.font.FontClosedException;
 import com.github.slmpc.lumingraphics.text.font.FontException;
 
@@ -20,11 +21,18 @@ public final class GlyphAtlasUpload implements AutoCloseable {
         return texture;
     }
 
-    public boolean isClosed() { return closed.get(); }
+    public boolean isClosed() {
+        return closed.get();
+    }
 
-    @Override public void close() {
+    @Override
+    public void close() {
         if (closed.compareAndSet(false, true)) {
-            try { owner.close(); } catch (Exception error) { throw new FontException("Failed to close glyph upload", error); }
+            try {
+                owner.close();
+            } catch (Exception error) {
+                throw new FontException("Failed to close glyph upload", error);
+            }
         }
     }
 }

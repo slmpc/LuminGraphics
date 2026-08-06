@@ -23,12 +23,16 @@ public final class LuminPipelineCatalog {
     private LuminPipelineCatalog() {
     }
 
-    /** 返回稳定且不可修改的全部管线描述。 */
+    /**
+     * 返回稳定且不可修改的全部管线描述。
+     */
     public static List<PipelineDescriptor> entries() {
         return ENTRIES;
     }
 
-    /** 按稳定 ID 返回管线描述；未知 ID 会抛出 {@link IllegalArgumentException}。 */
+    /**
+     * 按稳定 ID 返回管线描述；未知 ID 会抛出 {@link IllegalArgumentException}。
+     */
     public static PipelineDescriptor require(String id) {
         return ENTRIES.stream().filter(entry -> entry.id().equals(id)).findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("unknown pipeline: " + id));
@@ -85,7 +89,7 @@ public final class LuminPipelineCatalog {
     }
 
     private static PipelineDescriptor descriptor(String id, String vertex, String fragment, VertexLayout layout,
-                                                  GeometryExpansion expansion, Set<String> samplers, String role) {
+                                                 GeometryExpansion expansion, Set<String> samplers, String role) {
         return new PipelineDescriptor(id, ShaderRef.vertex(vertex), ShaderRef.fragment(fragment), layout,
                 RhiPrimitiveTopology.TRIANGLE_LIST, expansion, Blend.TRANSLUCENT, Depth.DISABLED, Raster.NO_CULL,
                 FRAME_ABI, drawAbi(layout), samplers, role);
@@ -104,11 +108,15 @@ public final class LuminPipelineCatalog {
         return new DrawAbi(true, attributes);
     }
 
-    public enum ShaderStage { VERTEX, FRAGMENT }
-    public enum GeometryExpansion { NONE, QUAD_TO_INDEXED_TRIANGLES }
-    public enum Blend { TRANSLUCENT }
-    public enum Depth { DISABLED }
-    public enum Raster { NO_CULL }
+    public enum ShaderStage {VERTEX, FRAGMENT}
+
+    public enum GeometryExpansion {NONE, QUAD_TO_INDEXED_TRIANGLES}
+
+    public enum Blend {TRANSLUCENT}
+
+    public enum Depth {DISABLED}
+
+    public enum Raster {NO_CULL}
 
     public enum VertexLayout {
         POSITION(null, List.of(0)),
@@ -154,7 +162,9 @@ public final class LuminPipelineCatalog {
         }
     }
 
-    public record FrameAbi(String block, int binding, String projection, String viewport) { }
+    public record FrameAbi(String block, int binding, String projection, String viewport) {
+    }
+
     public record DrawAbi(boolean cpuTransformedPositions, List<String> attributes) {
         public DrawAbi {
             attributes = List.copyOf(attributes);

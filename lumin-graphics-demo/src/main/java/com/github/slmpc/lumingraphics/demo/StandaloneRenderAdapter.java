@@ -83,7 +83,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-/** Demo-owned adapter that exercises the public Lumin render path on a real Prism device. */
+/**
+ * Demo-owned adapter that exercises the public Lumin render path on a real Prism device.
+ */
 final class StandaloneRenderAdapter implements RenderResources, UiResourceResolver, AutoCloseable {
     static final int WIDTH = 320;
     static final int HEIGHT = 192;
@@ -148,27 +150,37 @@ final class StandaloneRenderAdapter implements RenderResources, UiResourceResolv
         fxaa = new FxaaShader(this, 1024);
     }
 
-    @Override public RhiDevice device() { return device; }
+    @Override
+    public RhiDevice device() {
+        return device;
+    }
 
-    @Override public RhiGraphicsPipeline requirePipeline(String id) {
+    @Override
+    public RhiGraphicsPipeline requirePipeline(String id) {
         RhiGraphicsPipeline pipeline = pipelines.get(id);
         if (pipeline == null) throw new IllegalArgumentException("demo pipeline is unavailable: " + id);
         return pipeline;
     }
 
-    @Override public RhiDescriptorSet requireFrameDescriptor() { return frameSet; }
+    @Override
+    public RhiDescriptorSet requireFrameDescriptor() {
+        return frameSet;
+    }
 
-    @Override public RhiDescriptorSet requireTextureDescriptor(Render2DTexture texture) {
+    @Override
+    public RhiDescriptorSet requireTextureDescriptor(Render2DTexture texture) {
         TextureResource resource = textures.get(texture);
         if (resource == null) throw new IllegalArgumentException("demo texture is unavailable: " + texture);
         return resource.descriptor;
     }
 
-    @Override public RhiDescriptorSet requireSegmentedShadowDescriptor(Render2DCommand.SegmentedShadow ignored) {
+    @Override
+    public RhiDescriptorSet requireSegmentedShadowDescriptor(Render2DCommand.SegmentedShadow ignored) {
         throw new IllegalArgumentException("segmented shadows are not part of the standalone scene");
     }
 
-    @Override public FullscreenEffectBinding requireFullscreenEffectBinding(
+    @Override
+    public FullscreenEffectBinding requireFullscreenEffectBinding(
             FullscreenEffectRequest request, RenderExecution execution) {
         if (!request.pipelineId().equals("fxaa")) {
             throw new IllegalArgumentException("demo fullscreen effect is unavailable: " + request.pipelineId());
@@ -177,14 +189,19 @@ final class StandaloneRenderAdapter implements RenderResources, UiResourceResolv
         return new FullscreenEffectBinding(requireTextureDescriptor(request.input()), FullscreenEffectPass.external());
     }
 
-    @Override public Render2DTexture texture(String id) {
+    @Override
+    public Render2DTexture texture(String id) {
         return textures.keySet().stream().filter(value -> value instanceof Render2DTexture.Resource resource
                 && resource.id().equals(id)).findFirst().orElseThrow();
     }
 
-    @Override public TtfFontLoader font(String id) { return font; }
+    @Override
+    public TtfFontLoader font(String id) {
+        return font;
+    }
 
-    @Override public Render2DTexture atlasTexture(Object texture) {
+    @Override
+    public Render2DTexture atlasTexture(Object texture) {
         if (texture instanceof Render2DTexture value && textures.containsKey(value)) return value;
         throw new IllegalArgumentException("unknown standalone atlas texture");
     }
@@ -346,16 +363,35 @@ final class StandaloneRenderAdapter implements RenderResources, UiResourceResolv
     private RhiImageView nativeForwardingView(RhiImageView delegate) {
         if (device.api() == BackendApi.VULKAN) return delegate;
         return new RhiImageView() {
-            @Override public BackendApi api() { return delegate.api(); }
-            @Override public RhiImage image() { return delegate.image(); }
-            @Override public RhiFormat format() { return delegate.format(); }
-            @Override public Set<com.github.slmpc.prismrhi.resource.RhiImageAspect> aspects() {
+            @Override
+            public BackendApi api() {
+                return delegate.api();
+            }
+
+            @Override
+            public RhiImage image() {
+                return delegate.image();
+            }
+
+            @Override
+            public RhiFormat format() {
+                return delegate.format();
+            }
+
+            @Override
+            public Set<com.github.slmpc.prismrhi.resource.RhiImageAspect> aspects() {
                 return delegate.aspects();
             }
-            @Override public Optional<RhiNativeObject> getNativeObject(RhiNativeObjectType type) {
+
+            @Override
+            public Optional<RhiNativeObject> getNativeObject(RhiNativeObjectType type) {
                 return delegate.image().getNativeObject(type);
             }
-            @Override public void close() { delegate.close(); }
+
+            @Override
+            public void close() {
+                delegate.close();
+            }
         };
     }
 
@@ -370,15 +406,16 @@ final class StandaloneRenderAdapter implements RenderResources, UiResourceResolv
 
     private static byte[] checkerboard(int width, int height) {
         byte[] pixels = new byte[width * height * 4];
-        for (int y = 0; y < height; y++) for (int x = 0; x < width; x++) {
-            int index = (y * width + x) * 4;
-            int mirroredY = Math.min(y, height - 1 - y);
-            boolean light = ((x / 4) + (mirroredY / 4)) % 2 == 0;
-            pixels[index] = (byte) (light ? 40 : 12);
-            pixels[index + 1] = (byte) (light ? 220 : 92);
-            pixels[index + 2] = (byte) (light ? 86 : 35);
-            pixels[index + 3] = (byte) 255;
-        }
+        for (int y = 0; y < height; y++)
+            for (int x = 0; x < width; x++) {
+                int index = (y * width + x) * 4;
+                int mirroredY = Math.min(y, height - 1 - y);
+                boolean light = ((x / 4) + (mirroredY / 4)) % 2 == 0;
+                pixels[index] = (byte) (light ? 40 : 12);
+                pixels[index + 1] = (byte) (light ? 220 : 92);
+                pixels[index + 2] = (byte) (light ? 86 : 35);
+                pixels[index + 3] = (byte) 255;
+            }
         return pixels;
     }
 
@@ -391,7 +428,8 @@ final class StandaloneRenderAdapter implements RenderResources, UiResourceResolv
         if (resource != null) resource.close();
     }
 
-    @Override public void close() {
+    @Override
+    public void close() {
         fxaa.close();
         uiBatch.close();
         textRenderer.close();
@@ -425,12 +463,23 @@ final class StandaloneRenderAdapter implements RenderResources, UiResourceResolv
         final Map<String, Integer> pipelineBinds = new LinkedHashMap<>();
         final Map<String, Integer> drawCalls = new LinkedHashMap<>();
         String activeCategory;
-        int binds(String category) { return pipelineBinds.getOrDefault(category, 0); }
-        int draws(String category) { return drawCalls.getOrDefault(category, 0); }
+
+        int binds(String category) {
+            return pipelineBinds.getOrDefault(category, 0);
+        }
+
+        int draws(String category) {
+            return drawCalls.getOrDefault(category, 0);
+        }
     }
 
     private record TextureResource(RhiDescriptorSet descriptor, RhiImageView view, RhiImage image)
             implements AutoCloseable {
-        @Override public void close() { descriptor.close(); view.close(); image.close(); }
+        @Override
+        public void close() {
+            descriptor.close();
+            view.close();
+            image.close();
+        }
     }
 }

@@ -11,12 +11,14 @@ public final class SegmentedShadowRenderer extends AbstractRenderer<Render2DComm
         super(Render2DCommand.SegmentedShadow.class, resources, capacity, "segmented-shadow");
     }
 
-    @Override protected VertexBatch vertices(Render2DCommand.SegmentedShadow command) {
+    @Override
+    protected VertexBatch vertices(Render2DCommand.SegmentedShadow command) {
         return VertexBatches.segmentedShadow(command);
     }
 
-    @Override protected RhiDescriptorSet descriptor(Render2DCommand.SegmentedShadow command,
-                                                    RenderExecution execution) {
+    @Override
+    protected RhiDescriptorSet descriptor(Render2DCommand.SegmentedShadow command,
+                                          RenderExecution execution) {
         return execution.resources().requireSegmentedShadowDescriptor(command);
     }
 }

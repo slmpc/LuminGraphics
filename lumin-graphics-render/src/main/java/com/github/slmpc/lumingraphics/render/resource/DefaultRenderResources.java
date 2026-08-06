@@ -40,9 +40,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-/** Lumin 默认管线、descriptor layout 与帧 uniform 服务。 */
+/**
+ * Lumin 默认管线、descriptor layout 与帧 uniform 服务。
+ */
 public final class DefaultRenderResources implements RenderResources, AutoCloseable {
-    /** {@code LuminFrame} 的 std140 大小：一个 {@code mat4} 和一个 {@code vec4}。 */
+    /**
+     * {@code LuminFrame} 的 std140 大小：一个 {@code mat4} 和一个 {@code vec4}。
+     */
     public static final int FRAME_UNIFORM_BYTES = 20 * Float.BYTES;
     private static final int SEGMENT_UNIFORM_BYTES = 16 + 64 * 16 + 64 * 16;
 
@@ -85,8 +89,11 @@ public final class DefaultRenderResources implements RenderResources, AutoClosea
         try {
             createPipelines(colorFormat, depthFormat == null ? RhiFormat.UNDEFINED : depthFormat);
         } catch (RuntimeException failure) {
-            try { close(); }
-            catch (RuntimeException cleanupFailure) { failure.addSuppressed(cleanupFailure); }
+            try {
+                close();
+            } catch (RuntimeException cleanupFailure) {
+                failure.addSuppressed(cleanupFailure);
+            }
             throw failure;
         }
     }
@@ -95,11 +102,22 @@ public final class DefaultRenderResources implements RenderResources, AutoClosea
         return LuminPipelineCatalog.entries().stream().map(LuminPipelineCatalog.PipelineDescriptor::id).toList();
     }
 
-    @Override public RhiDevice device() { requireOpen(); return device; }
+    @Override
+    public RhiDevice device() {
+        requireOpen();
+        return device;
+    }
 
-    public RhiContextIdentity contextIdentity() { requireOpen(); return contextIdentity; }
+    public RhiContextIdentity contextIdentity() {
+        requireOpen();
+        return contextIdentity;
+    }
 
-    @Override public RhiDescriptorSet requireFrameDescriptor() { requireOpen(); return frameDescriptor; }
+    @Override
+    public RhiDescriptorSet requireFrameDescriptor() {
+        requireOpen();
+        return frameDescriptor;
+    }
 
     /**
      * 使用 {@link #FRAME_UNIFORM_BYTES} 个调用方编码的字节更新 {@code LuminFrame}。
@@ -116,7 +134,8 @@ public final class DefaultRenderResources implements RenderResources, AutoClosea
         frameBuffer.write(bytes);
     }
 
-    @Override public RhiGraphicsPipeline requirePipeline(String id) {
+    @Override
+    public RhiGraphicsPipeline requirePipeline(String id) {
         requireOpen();
         RhiGraphicsPipeline pipeline = pipelines.get(id);
         if (pipeline == null) {
@@ -145,8 +164,11 @@ public final class DefaultRenderResources implements RenderResources, AutoClosea
                     .combinedImageSampler(1, 0, view, sampler));
             return descriptor;
         } catch (RuntimeException failure) {
-            try { descriptor.close(); }
-            catch (RuntimeException cleanupFailure) { failure.addSuppressed(cleanupFailure); }
+            try {
+                descriptor.close();
+            } catch (RuntimeException cleanupFailure) {
+                failure.addSuppressed(cleanupFailure);
+            }
             throw failure;
         }
     }
@@ -165,7 +187,8 @@ public final class DefaultRenderResources implements RenderResources, AutoClosea
         return true;
     }
 
-    @Override public RhiDescriptorSet requireTextureDescriptor(Render2DTexture texture) {
+    @Override
+    public RhiDescriptorSet requireTextureDescriptor(Render2DTexture texture) {
         requireOpen();
         RegisteredDescriptor registered = textures.get(texture);
         if (registered == null) {
@@ -176,7 +199,8 @@ public final class DefaultRenderResources implements RenderResources, AutoClosea
         return registered.descriptor();
     }
 
-    @Override public RhiDescriptorSet requireSegmentedShadowDescriptor(Render2DCommand.SegmentedShadow shadow) {
+    @Override
+    public RhiDescriptorSet requireSegmentedShadowDescriptor(Render2DCommand.SegmentedShadow shadow) {
         requireOpen();
         return segmented.computeIfAbsent(Objects.requireNonNull(shadow, "shadow"), this::createSegmented).descriptor();
     }
@@ -242,7 +266,8 @@ public final class DefaultRenderResources implements RenderResources, AutoClosea
         return RhiDescriptorSetLayoutCreateInfo.builder();
     }
 
-    @Override public void close() {
+    @Override
+    public void close() {
         if (closed) return;
         closed = true;
         List<AutoCloseable> owned = new ArrayList<>();
@@ -258,11 +283,13 @@ public final class DefaultRenderResources implements RenderResources, AutoClosea
         owned.addAll(segmented.values());
         RuntimeException failure = null;
         for (int index = owned.size() - 1; index >= 0; index--) {
-            try { owned.get(index).close(); }
-            catch (Exception exception) {
+            try {
+                owned.get(index).close();
+            } catch (Exception exception) {
                 RuntimeException next = exception instanceof RuntimeException runtime ? runtime
                         : new IllegalStateException("Failed to close Lumin render resource", exception);
-                if (failure == null) failure = next; else failure.addSuppressed(next);
+                if (failure == null) failure = next;
+                else failure.addSuppressed(next);
             }
         }
         segmented.clear();
@@ -277,9 +304,14 @@ public final class DefaultRenderResources implements RenderResources, AutoClosea
                 "Lumin render resources are closed for context " + contextIdentity);
     }
 
-    private record RegisteredDescriptor(RhiDescriptorSet descriptor, RhiContextIdentity contextIdentity) { }
+    private record RegisteredDescriptor(RhiDescriptorSet descriptor, RhiContextIdentity contextIdentity) {
+    }
 
     private record SegmentedDescriptor(RhiDescriptorSet descriptor, RhiBuffer buffer) implements AutoCloseable {
-        @Override public void close() { descriptor.close(); buffer.close(); }
+        @Override
+        public void close() {
+            descriptor.close();
+            buffer.close();
+        }
     }
 }

@@ -20,10 +20,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 class ShaderCompilerTransactionTest {
     private static final Path ROOT = locateRoot();
@@ -114,7 +111,9 @@ class ShaderCompilerTransactionTest {
         String before = treeHash(live);
 
         assertThrows(IOException.class, () -> ShaderCompilerTool.run(REAL_SOURCES, live,
-                () -> { throw new IOException("simulated promotion interruption"); }));
+                () -> {
+                    throw new IOException("simulated promotion interruption");
+                }));
 
         assertEquals(before, treeHash(live), "promotion failure did not restore the last completed tree");
         assertNoTransactionDirectories(live);
@@ -239,8 +238,7 @@ class ShaderCompilerTransactionTest {
             successful.get(30, TimeUnit.SECONDS);
             ExecutionException failure = assertThrows(ExecutionException.class,
                     () -> failed.get(30, TimeUnit.SECONDS));
-            assertTrue(failure.getCause() instanceof RhiException,
-                    "expected real shader compiler failure, got " + failure.getCause());
+            assertInstanceOf(RhiException.class, failure.getCause(), "expected real shader compiler failure, got " + failure.getCause());
         } finally {
             releaseSuccessful.countDown();
             executor.shutdownNow();

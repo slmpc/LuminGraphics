@@ -37,7 +37,9 @@ final class FakeRhi {
     private String missingPipeline;
     private final RhiDevice device = createDevice();
 
-    RhiDevice device() { return device; }
+    RhiDevice device() {
+        return device;
+    }
 
     private RhiDevice createDevice() {
         return proxy(RhiDevice.class, (self, method, args) -> switch (method.getName()) {
@@ -51,29 +53,42 @@ final class FakeRhi {
 
     RenderResources resources() {
         return new RenderResources() {
-            @Override public RhiDevice device() { return FakeRhi.this.device(); }
-            @Override public RhiGraphicsPipeline requirePipeline(String id) {
+            @Override
+            public RhiDevice device() {
+                return FakeRhi.this.device();
+            }
+
+            @Override
+            public RhiGraphicsPipeline requirePipeline(String id) {
                 if (id.equals(missingPipeline)) throw new IllegalStateException("missing pipeline: " + id);
                 pipelines.add(id);
                 trace.add("pipeline=" + id);
                 return proxy(RhiGraphicsPipeline.class, FakeRhi::resourceCall);
             }
-            @Override public RhiDescriptorSet requireFrameDescriptor() {
+
+            @Override
+            public RhiDescriptorSet requireFrameDescriptor() {
                 trace.add("descriptor=frame");
                 return proxy(RhiDescriptorSet.class, FakeRhi::resourceCall);
             }
-            @Override public RhiDescriptorSet requireTextureDescriptor(Render2DTexture texture) {
+
+            @Override
+            public RhiDescriptorSet requireTextureDescriptor(Render2DTexture texture) {
                 String id = texture instanceof Render2DTexture.Resource resource ? resource.id() : "lumin";
                 if (id.equals("missing")) throw new IllegalStateException("missing texture: " + id);
                 trace.add("descriptor=" + id);
                 return proxy(RhiDescriptorSet.class, FakeRhi::resourceCall);
             }
-            @Override public RhiDescriptorSet requireSegmentedShadowDescriptor(Render2DCommand.SegmentedShadow shadow) {
+
+            @Override
+            public RhiDescriptorSet requireSegmentedShadowDescriptor(Render2DCommand.SegmentedShadow shadow) {
                 segmentedPayloads.add(shadow);
                 trace.add("segmentedDescriptor=" + shadow.segmentCount());
                 return proxy(RhiDescriptorSet.class, FakeRhi::resourceCall);
             }
-            @Override public FullscreenEffectBinding requireFullscreenEffectBinding(
+
+            @Override
+            public FullscreenEffectBinding requireFullscreenEffectBinding(
                     FullscreenEffectRequest request, RenderExecution execution) {
                 String id = request.input() instanceof Render2DTexture.Resource resource ? resource.id() : "lumin";
                 if (id.equals("missing")) throw new IllegalStateException("missing effect input: " + id);
@@ -98,14 +113,37 @@ final class FakeRhi {
         return new RenderExecution(commandBuffer(), resources(), frame, complete, width, height);
     }
 
-    List<String> trace() { return List.copyOf(trace); }
-    List<String> boundPipelines() { return List.copyOf(pipelines); }
-    List<byte[]> writes() { return writes.stream().map(byte[]::clone).toList(); }
-    List<Render2DCommand.SegmentedShadow> segmentedPayloads() { return List.copyOf(segmentedPayloads); }
-    int closedBuffers() { return closedBuffers; }
-    void failNextDraw() { failNextDraw = true; }
-    void missingPipeline(String id) { missingPipeline = id; }
-    void record(String value) { trace.add(value); }
+    List<String> trace() {
+        return List.copyOf(trace);
+    }
+
+    List<String> boundPipelines() {
+        return List.copyOf(pipelines);
+    }
+
+    List<byte[]> writes() {
+        return writes.stream().map(byte[]::clone).toList();
+    }
+
+    List<Render2DCommand.SegmentedShadow> segmentedPayloads() {
+        return List.copyOf(segmentedPayloads);
+    }
+
+    int closedBuffers() {
+        return closedBuffers;
+    }
+
+    void failNextDraw() {
+        failNextDraw = true;
+    }
+
+    void missingPipeline(String id) {
+        missingPipeline = id;
+    }
+
+    void record(String value) {
+        trace.add(value);
+    }
 
     private RhiBuffer buffer(long size) {
         AtomicBoolean closed = new AtomicBoolean();
@@ -120,7 +158,10 @@ final class FakeRhi {
                 trace.add("write=" + args[0] + ":" + bytes.length);
                 yield null;
             }
-            case "close" -> { if (closed.compareAndSet(false, true)) closedBuffers++; yield null; }
+            case "close" -> {
+                if (closed.compareAndSet(false, true)) closedBuffers++;
+                yield null;
+            }
             default -> defaultValue(method);
         });
     }
@@ -138,9 +179,18 @@ final class FakeRhi {
                 trace.add("topology=" + args[0]);
                 yield null;
             }
-            case "bindVertexBuffer" -> { trace.add("vertexBuffer=" + args[2]); yield null; }
-            case "begin" -> { trace.add("command.begin"); yield null; }
-            case "end" -> { trace.add("command.end"); yield null; }
+            case "bindVertexBuffer" -> {
+                trace.add("vertexBuffer=" + args[2]);
+                yield null;
+            }
+            case "begin" -> {
+                trace.add("command.begin");
+                yield null;
+            }
+            case "end" -> {
+                trace.add("command.end");
+                yield null;
+            }
             case "bindGraphicsPipeline", "bindDescriptorSet", "setViewport", "close" -> null;
             case "beginRendering" -> {
                 var info = (RhiRenderingInfo) args[0];
@@ -148,9 +198,15 @@ final class FakeRhi {
                         + info.renderArea().extent().height());
                 yield null;
             }
-            case "endRendering" -> { trace.add("render.end"); yield null; }
+            case "endRendering" -> {
+                trace.add("render.end");
+                yield null;
+            }
             case "draw" -> {
-                if (failNextDraw) { failNextDraw = false; throw new IllegalStateException("backend draw failed"); }
+                if (failNextDraw) {
+                    failNextDraw = false;
+                    throw new IllegalStateException("backend draw failed");
+                }
                 int vertices = args[0] instanceof Integer value ? value
                         : ((com.github.slmpc.prismrhi.command.RhiDrawCommand) args[0]).vertexCount();
                 trace.add("draw=" + vertices);

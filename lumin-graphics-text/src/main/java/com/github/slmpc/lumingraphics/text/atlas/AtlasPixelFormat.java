@@ -5,6 +5,12 @@ public enum AtlasPixelFormat {
     RGBA8(4);
 
     private final int bytesPerPixel;
-    AtlasPixelFormat(int bytesPerPixel) { this.bytesPerPixel = bytesPerPixel; }
-    public int bytesPerPixel() { return bytesPerPixel; }
+
+    AtlasPixelFormat(int bytesPerPixel) {
+        this.bytesPerPixel = bytesPerPixel;
+    }
+
+    public int bytesPerPixel() {
+        return bytesPerPixel;
+    }
 }

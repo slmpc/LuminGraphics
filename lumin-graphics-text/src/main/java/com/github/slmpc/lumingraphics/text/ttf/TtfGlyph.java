@@ -2,7 +2,9 @@ package com.github.slmpc.lumingraphics.text.ttf;
 
 import java.util.Arrays;
 
-/** MIG-TEXT-TTF-GLYPH */
+/**
+ * MIG-TEXT-TTF-GLYPH
+ */
 public record TtfGlyph(int codepoint, int width, int height, int xOffset, int yOffset, int advance, byte[] pixels) {
     public TtfGlyph {
         pixels = Arrays.copyOf(pixels, pixels.length);
@@ -10,5 +12,9 @@ public record TtfGlyph(int codepoint, int width, int height, int xOffset, int yO
             throw new IllegalArgumentException("Invalid glyph bitmap");
         }
     }
-    @Override public byte[] pixels() { return Arrays.copyOf(pixels, pixels.length); }
+
+    @Override
+    public byte[] pixels() {
+        return Arrays.copyOf(pixels, pixels.length);
+    }
 }

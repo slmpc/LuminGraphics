@@ -14,8 +14,7 @@ import java.util.Set;
 import java.util.jar.JarFile;
 
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 class PublishedArchitectureTest {
     @Test
@@ -60,7 +59,7 @@ class PublishedArchitectureTest {
                 sources = paths.filter(path -> path.toString().endsWith(".java")).toList();
             }
             System.out.println("ARCH_MODULE_SOURCE_COUNT " + module + "=" + sources.size());
-            assertTrue(!sources.isEmpty(), "published module source set must not be empty: " + module);
+            assertFalse(sources.isEmpty(), "published module source set must not be empty: " + module);
             sourceCount += sources.size();
             for (Path source : sources) {
                 String text = Files.readString(source);
@@ -87,13 +86,13 @@ class PublishedArchitectureTest {
                         String tail = entry.getName().substring(prefix.length());
                         namespaces.add(tail.substring(0, tail.indexOf('/')));
                     }
-                    assertTrue(!entry.getName().startsWith("META-INF/services/"), "service descriptor in " + jar + "!" + entry.getName());
+                    assertFalse(entry.getName().startsWith("META-INF/services/"), "service descriptor in " + jar + "!" + entry.getName());
                 }
             }
         }
         assertTrue(sourceCount > 20 && classEntries > 20 && jarEntries > classEntries,
                 "architecture source/class/JAR counts must be nonzero");
-        assertTrue(namespaces.equals(Set.of("core", "render", "text", "ui")), "public namespace ledger drift: " + namespaces);
+        assertEquals(namespaces, Set.of("core", "render", "text", "ui"), "public namespace ledger drift: " + namespaces);
         assertTrue(renderEntries.containsAll(Set.of(
                 "com/github/slmpc/lumingraphics/render/shader/FullscreenEffect.class",
                 "com/github/slmpc/lumingraphics/render/shader/FullscreenEffectRequest.class",
@@ -105,7 +104,7 @@ class PublishedArchitectureTest {
         )), "fullscreen effect API is missing from the published render JAR");
         List<String> migration = Files.readAllLines(repository.resolve("docs/migration/epsilon-surface.csv"));
         List<String> resources = Files.readAllLines(repository.resolve("docs/resources/manifest.csv"));
-        assertTrue(migration.size() == 54, "epsilon ledger count drift: " + (migration.size() - 1));
+        assertEquals(54, migration.size(), "epsilon ledger count drift: " + (migration.size() - 1));
         long shaders = resources.stream().skip(1).filter(row -> row.startsWith("shader,")).count();
         long fonts = resources.stream().skip(1).filter(row -> row.startsWith("font,")).count();
         rejectLedgerCounts(repository.resolve("docs/resources/manifest.csv").toString(), shaders, fonts);

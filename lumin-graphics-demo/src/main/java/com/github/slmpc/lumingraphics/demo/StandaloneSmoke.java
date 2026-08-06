@@ -48,7 +48,9 @@ import static org.lwjgl.opengl.GL20.*;
 import static org.lwjgl.opengl.GL30.*;
 import static org.lwjgl.opengl.GL31.*;
 
-/** Caller-owned native fixtures used by the standalone acceptance tasks. */
+/**
+ * Caller-owned native fixtures used by the standalone acceptance tasks.
+ */
 public final class StandaloneSmoke {
     private static final int WIDTH = 320;
     private static final int HEIGHT = 192;
@@ -321,32 +323,36 @@ public final class StandaloneSmoke {
     private static Metrics analyze(ByteBuffer pixels) {
         int nonblank = 0, minX = WIDTH, minY = HEIGHT, maxX = -1, maxY = -1;
         java.util.Set<Integer> colors = new java.util.HashSet<>();
-        for (int y = 0; y < HEIGHT; y++) for (int x = 0; x < WIDTH; x++) {
-            int i = (y * WIDTH + x) * 4;
-            int r = Byte.toUnsignedInt(pixels.get(i));
-            int g = Byte.toUnsignedInt(pixels.get(i + 1));
-            int b = Byte.toUnsignedInt(pixels.get(i + 2));
-            int color = (r << 16) | (g << 8) | b;
-            colors.add(color);
-            if (r + g + b > 32) {
-                nonblank++;
-                minX = Math.min(minX, x); minY = Math.min(minY, y);
-                maxX = Math.max(maxX, x); maxY = Math.max(maxY, y);
+        for (int y = 0; y < HEIGHT; y++)
+            for (int x = 0; x < WIDTH; x++) {
+                int i = (y * WIDTH + x) * 4;
+                int r = Byte.toUnsignedInt(pixels.get(i));
+                int g = Byte.toUnsignedInt(pixels.get(i + 1));
+                int b = Byte.toUnsignedInt(pixels.get(i + 2));
+                int color = (r << 16) | (g << 8) | b;
+                colors.add(color);
+                if (r + g + b > 32) {
+                    nonblank++;
+                    minX = Math.min(minX, x);
+                    minY = Math.min(minY, y);
+                    maxX = Math.max(maxX, x);
+                    maxY = Math.max(maxY, y);
+                }
             }
-        }
         return new Metrics(nonblank, colors.size(), minX, minY, maxX, maxY);
     }
 
     private static void writePng(ByteBuffer pixels, Path path) throws IOException {
         BufferedImage image = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_ARGB);
-        for (int y = 0; y < HEIGHT; y++) for (int x = 0; x < WIDTH; x++) {
-            int i = ((HEIGHT - 1 - y) * WIDTH + x) * 4;
-            int rgba = (Byte.toUnsignedInt(pixels.get(i + 3)) << 24)
-                    | (Byte.toUnsignedInt(pixels.get(i)) << 16)
-                    | (Byte.toUnsignedInt(pixels.get(i + 1)) << 8)
-                    | Byte.toUnsignedInt(pixels.get(i + 2));
-            image.setRGB(x, y, rgba);
-        }
+        for (int y = 0; y < HEIGHT; y++)
+            for (int x = 0; x < WIDTH; x++) {
+                int i = ((HEIGHT - 1 - y) * WIDTH + x) * 4;
+                int rgba = (Byte.toUnsignedInt(pixels.get(i + 3)) << 24)
+                        | (Byte.toUnsignedInt(pixels.get(i)) << 16)
+                        | (Byte.toUnsignedInt(pixels.get(i + 1)) << 8)
+                        | Byte.toUnsignedInt(pixels.get(i + 2));
+                image.setRGB(x, y, rgba);
+            }
         ImageIO.write(image, "png", path.toFile());
     }
 
@@ -443,5 +449,6 @@ public final class StandaloneSmoke {
     private record Metrics(int nonblank, int colors, int minX, int minY, int maxX, int maxY) {
     }
 
-    private record GlVariant(ByteBuffer pixels, StandaloneRenderAdapter.Trace trace) { }
+    private record GlVariant(ByteBuffer pixels, StandaloneRenderAdapter.Trace trace) {
+    }
 }

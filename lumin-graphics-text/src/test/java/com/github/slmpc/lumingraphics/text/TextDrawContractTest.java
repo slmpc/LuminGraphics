@@ -1,4 +1,5 @@
 package com.github.slmpc.lumingraphics.text;
+
 import com.github.slmpc.lumingraphics.text.font.FontClosedException;
 import com.github.slmpc.lumingraphics.text.font.FontResource;
 import com.github.slmpc.lumingraphics.text.ttf.TtfGlyph;
@@ -17,9 +18,11 @@ import com.github.slmpc.lumingraphics.text.render.TtfTextRenderer;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.github.slmpc.lumingraphics.core.geometry.LuminColor;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+
 import org.junit.jupiter.api.Test;
 
 class TextDrawContractTest {
@@ -29,7 +32,8 @@ class TextDrawContractTest {
     void configuredScaleMultiplierPreservesLegacyUiTextSize() {
         CountingUploader uploader = new CountingUploader();
         try (TtfFontLoader font = font(uploader);
-             TtfTextRenderer renderer = new TtfTextRenderer(0.35f, ignored -> { })) {
+             TtfTextRenderer renderer = new TtfTextRenderer(0.35f, ignored -> {
+             })) {
             TextMeasurement measurement = renderer.measure("Mg", 1.0f, font);
             assertEquals(font.metrics().lineHeight() * 0.35f, measurement.height(), 0.0001f);
 
@@ -56,15 +60,15 @@ class TextDrawContractTest {
             renderer.draw();
 
             assertEquals(List.of(
-                    new Snapshot(11, 13, 0.75f, regularColor, 11, 13, 0,
-                            regular.width(), regular.height(), regular.glyphCount(),
-                            regular.glyphRevision(), regular.atlasRevision(), regular.stableHash()),
-                    new Snapshot(17, 19, 1.25f, rotatedColor, 23, 29, -37.5f,
-                            rotated.width(), rotated.height(), rotated.glyphCount(),
-                            rotated.glyphRevision(), rotated.atlasRevision(), rotated.stableHash()),
-                    new Snapshot(31, 37, 0.5f, new LuminColor(1, 1, 1, 1), 31, 37, 0,
-                            legacy.width(), legacy.height(), legacy.glyphCount(),
-                            legacy.glyphRevision(), legacy.atlasRevision(), legacy.stableHash())),
+                            new Snapshot(11, 13, 0.75f, regularColor, 11, 13, 0,
+                                    regular.width(), regular.height(), regular.glyphCount(),
+                                    regular.glyphRevision(), regular.atlasRevision(), regular.stableHash()),
+                            new Snapshot(17, 19, 1.25f, rotatedColor, 23, 29, -37.5f,
+                                    rotated.width(), rotated.height(), rotated.glyphCount(),
+                                    rotated.glyphRevision(), rotated.atlasRevision(), rotated.stableHash()),
+                            new Snapshot(31, 37, 0.5f, new LuminColor(1, 1, 1, 1), 31, 37, 0,
+                                    legacy.width(), legacy.height(), legacy.glyphCount(),
+                                    legacy.glyphRevision(), legacy.atlasRevision(), legacy.stableHash())),
                     submitted);
             assertEquals(3, submitted.size(), "one descriptor per add must preserve insertion order");
         }
@@ -186,7 +190,7 @@ class TextDrawContractTest {
 
     private static TtfGlyphAtlas atlasWithUpload(int page, CountingUploader uploader) {
         TtfGlyphAtlas atlas = new TtfGlyphAtlas(page, 8, 8, uploader);
-        atlas.append(new TtfGlyph('A', 1, 1, 0, 0, 1, new byte[] { 1 }));
+        atlas.append(new TtfGlyph('A', 1, 1, 0, 0, 1, new byte[]{1}));
         return atlas;
     }
 
@@ -206,7 +210,9 @@ class TextDrawContractTest {
     private static final class CountingUploader implements GlyphAtlasUploader {
         private final AtomicInteger uploads = new AtomicInteger();
         private final AtomicInteger closes = new AtomicInteger();
-        @Override public GlyphAtlasUpload upload(AtlasPixels pixels) {
+
+        @Override
+        public GlyphAtlasUpload upload(AtlasPixels pixels) {
             int id = uploads.incrementAndGet();
             return new GlyphAtlasUpload("draw-contract-" + id, closes::incrementAndGet);
         }

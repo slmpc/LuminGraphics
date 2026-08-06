@@ -12,7 +12,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 
-/** Loads retained source or precompiled bytes; shader compilation is never selected at runtime. */
+/**
+ * Loads retained source or precompiled bytes; shader compilation is never selected at runtime.
+ */
 public final class ShaderArtifactLibrary {
     private static final String ROOT = "/assets/lumin_graphics/shaders/";
 

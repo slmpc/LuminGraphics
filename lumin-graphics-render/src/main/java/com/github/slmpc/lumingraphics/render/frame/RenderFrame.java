@@ -17,12 +17,12 @@ public final class RenderFrame implements AutoCloseable {
     /**
      * 开始一个命令缓冲并创建该帧的执行上下文。
      *
-     * @param commands 尚未开始的调用方命令缓冲
-     * @param resources 此帧 renderer 使用的资源提供者
-     * @param frameId 当前递增帧号
+     * @param commands         尚未开始的调用方命令缓冲
+     * @param resources        此帧 renderer 使用的资源提供者
+     * @param frameId          当前递增帧号
      * @param completedFrameId 最近完成的帧号
-     * @param width 当前 framebuffer 宽度
-     * @param height 当前 framebuffer 高度
+     * @param width            当前 framebuffer 宽度
+     * @param height           当前 framebuffer 高度
      */
     public RenderFrame(RhiCommandBuffer commands, RenderResources resources, long frameId,
                        long completedFrameId, int width, int height) {
@@ -32,13 +32,16 @@ public final class RenderFrame implements AutoCloseable {
         commands.begin();
     }
 
-    /** 返回供 renderer 写入命令的帧执行上下文。 */
+    /**
+     * 返回供 renderer 写入命令的帧执行上下文。
+     */
     public RenderExecution execution() {
         if (closed) throw new IllegalStateException("render frame is closed");
         return execution;
     }
 
-    @Override public void close() {
+    @Override
+    public void close() {
         if (closed) return;
         closed = true;
         commands.end();

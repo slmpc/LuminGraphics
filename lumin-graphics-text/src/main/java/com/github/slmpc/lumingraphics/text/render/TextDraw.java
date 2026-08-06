@@ -1,9 +1,11 @@
 package com.github.slmpc.lumingraphics.text.render;
+
 import com.github.slmpc.lumingraphics.text.font.FontClosedException;
 import com.github.slmpc.lumingraphics.text.layout.TextLayout;
 import com.github.slmpc.lumingraphics.text.layout.TextRenderBatch;
 
 import com.github.slmpc.lumingraphics.core.geometry.LuminColor;
+
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -26,7 +28,7 @@ public final class TextDraw implements AutoCloseable {
     private final AtomicBoolean closed = new AtomicBoolean();
 
     public TextDraw(float x, float y, float scale, LuminColor color, float originX, float originY,
-             float rotationDegrees, TextLayout layout) {
+                    float rotationDegrees, TextLayout layout) {
         this.x = finite("x", x);
         this.y = finite("y", y);
         this.scale = finite("scale", scale);
@@ -38,23 +40,70 @@ public final class TextDraw implements AutoCloseable {
         this.layout = Objects.requireNonNull(layout, "layout");
     }
 
-    public float x() { return x; }
-    public float y() { return y; }
-    public float scale() { return scale; }
-    public LuminColor color() { return color; }
-    public float originX() { return originX; }
-    public float originY() { return originY; }
-    public float rotationDegrees() { return rotationDegrees; }
-    public float width() { return layout.width(); }
-    public float height() { return layout.height(); }
-    public int glyphCount() { return layout.glyphCount(); }
-    public long glyphRevision() { return layout.glyphRevision(); }
-    public long atlasRevision() { return layout.atlasRevision(); }
-    public long stableHash() { return layout.stableHash(); }
-    public List<TextRenderBatch> batches() { ensureOpen(); return layout.batches(); }
-    public boolean isClosed() { return closed.get(); }
+    public float x() {
+        return x;
+    }
 
-    /** Returns an independently owned snapshot retaining the exact uploads used by this draw. */
+    public float y() {
+        return y;
+    }
+
+    public float scale() {
+        return scale;
+    }
+
+    public LuminColor color() {
+        return color;
+    }
+
+    public float originX() {
+        return originX;
+    }
+
+    public float originY() {
+        return originY;
+    }
+
+    public float rotationDegrees() {
+        return rotationDegrees;
+    }
+
+    public float width() {
+        return layout.width();
+    }
+
+    public float height() {
+        return layout.height();
+    }
+
+    public int glyphCount() {
+        return layout.glyphCount();
+    }
+
+    public long glyphRevision() {
+        return layout.glyphRevision();
+    }
+
+    public long atlasRevision() {
+        return layout.atlasRevision();
+    }
+
+    public long stableHash() {
+        return layout.stableHash();
+    }
+
+    public List<TextRenderBatch> batches() {
+        ensureOpen();
+        return layout.batches();
+    }
+
+    public boolean isClosed() {
+        return closed.get();
+    }
+
+    /**
+     * Returns an independently owned snapshot retaining the exact uploads used by this draw.
+     */
     public synchronized TextDraw retain() {
         ensureOpen();
         List<TextRenderBatch> retained = new java.util.ArrayList<>(layout.batches().size());
@@ -70,14 +119,16 @@ public final class TextDraw implements AutoCloseable {
         return new TextDraw(x, y, scale, color, originX, originY, rotationDegrees, retainedLayout);
     }
 
-    @Override public synchronized void close() {
+    @Override
+    public synchronized void close() {
         if (!closed.compareAndSet(false, true)) return;
         RuntimeException failure = null;
         for (TextRenderBatch batch : layout.batches()) {
             try {
                 batch.close();
             } catch (RuntimeException error) {
-                if (failure == null) failure = error; else failure.addSuppressed(error);
+                if (failure == null) failure = error;
+                else failure.addSuppressed(error);
             }
         }
         if (failure != null) throw failure;

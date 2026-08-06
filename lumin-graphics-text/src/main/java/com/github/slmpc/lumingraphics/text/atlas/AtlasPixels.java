@@ -17,7 +17,11 @@ public record AtlasPixels(int width, int height, long revision, AtlasPixelFormat
         this(width, height, revision, AtlasPixelFormat.ALPHA8, alpha8);
     }
 
-    @Override public byte[] data() { return Arrays.copyOf(data, data.length); }
+    @Override
+    public byte[] data() {
+        return Arrays.copyOf(data, data.length);
+    }
+
     public byte[] alpha8() {
         if (format != AtlasPixelFormat.ALPHA8) throw new IllegalStateException("Atlas is not ALPHA8");
         return data();

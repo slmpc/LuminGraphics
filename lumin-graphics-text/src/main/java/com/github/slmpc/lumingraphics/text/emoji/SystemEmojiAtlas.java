@@ -1,4 +1,5 @@
 package com.github.slmpc.lumingraphics.text.emoji;
+
 import com.github.slmpc.lumingraphics.text.font.FontClosedException;
 import com.github.slmpc.lumingraphics.text.font.MissingGlyphException;
 import com.github.slmpc.lumingraphics.text.atlas.AtlasExhaustedException;
@@ -19,7 +20,9 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 
-/** MIG-TEXT-EMOJI-ATLAS */
+/**
+ * MIG-TEXT-EMOJI-ATLAS
+ */
 public final class SystemEmojiAtlas implements AutoCloseable {
     private final int width;
     private final int height;
@@ -35,7 +38,8 @@ public final class SystemEmojiAtlas implements AutoCloseable {
     private boolean closed;
 
     public SystemEmojiAtlas(int width, int height, int fontSize, GlyphAtlasUploader uploader) {
-        if (width < 2 || height < 2 || fontSize <= 0) throw new IllegalArgumentException("Invalid emoji atlas dimensions");
+        if (width < 2 || height < 2 || fontSize <= 0)
+            throw new IllegalArgumentException("Invalid emoji atlas dimensions");
         this.width = width;
         this.height = height;
         this.fontSize = fontSize;
@@ -50,7 +54,11 @@ public final class SystemEmojiAtlas implements AutoCloseable {
         if (existing != null) return existing;
         Raster raster = rasterize(codepoint);
         int x = cursorX, y = cursorY, nextRowHeight = rowHeight;
-        if (x + raster.width + 1 > width) { x = 1; y += nextRowHeight + 1; nextRowHeight = 0; }
+        if (x + raster.width + 1 > width) {
+            x = 1;
+            y += nextRowHeight + 1;
+            nextRowHeight = 0;
+        }
         if (x + raster.width + 1 > width || y + raster.height + 1 > height) {
             throw new AtlasExhaustedException("Emoji atlas exhausted for U+" + Integer.toHexString(codepoint));
         }
@@ -83,8 +91,15 @@ public final class SystemEmojiAtlas implements AutoCloseable {
         return glyph;
     }
 
-    public synchronized GlyphAtlasUpload upload() { ensureOpen(); return upload; }
-    public synchronized long revision() { ensureOpen(); return revision; }
+    public synchronized GlyphAtlasUpload upload() {
+        ensureOpen();
+        return upload;
+    }
+
+    public synchronized long revision() {
+        ensureOpen();
+        return revision;
+    }
 
     private Raster rasterize(int codepoint) {
         String text = new String(Character.toChars(codepoint));
@@ -107,14 +122,15 @@ public final class SystemEmojiAtlas implements AutoCloseable {
         graphics.drawString(text, 2, baseline);
         graphics.dispose();
         byte[] pixels = new byte[glyphWidth * glyphHeight * 4];
-        for (int y = 0; y < glyphHeight; y++) for (int x = 0; x < glyphWidth; x++) {
-            int argb = image.getRGB(x, y);
-            int base = (y * glyphWidth + x) * 4;
-            pixels[base] = (byte) (argb >>> 16);
-            pixels[base + 1] = (byte) (argb >>> 8);
-            pixels[base + 2] = (byte) argb;
-            pixels[base + 3] = (byte) (argb >>> 24);
-        }
+        for (int y = 0; y < glyphHeight; y++)
+            for (int x = 0; x < glyphWidth; x++) {
+                int argb = image.getRGB(x, y);
+                int base = (y * glyphWidth + x) * 4;
+                pixels[base] = (byte) (argb >>> 16);
+                pixels[base + 1] = (byte) (argb >>> 8);
+                pixels[base + 2] = (byte) argb;
+                pixels[base + 3] = (byte) (argb >>> 24);
+            }
         return new Raster(glyphWidth, glyphHeight, pixels);
     }
 
@@ -122,15 +138,28 @@ public final class SystemEmojiAtlas implements AutoCloseable {
         graphics.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
         graphics.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON);
     }
+
     private static String systemEmojiFamily() {
         String os = System.getProperty("os.name", "").toLowerCase();
         if (os.contains("win")) return "Segoe UI Emoji";
         if (os.contains("mac")) return "Apple Color Emoji";
         return "Noto Color Emoji";
     }
-    private void ensureOpen() { if (closed) throw new FontClosedException("Emoji atlas is closed"); }
-    @Override public synchronized void close() {
-        if (!closed) { closed = true; glyphs.clear(); if (upload != null) upload.close(); upload = null; }
+
+    private void ensureOpen() {
+        if (closed) throw new FontClosedException("Emoji atlas is closed");
     }
-    private record Raster(int width, int height, byte[] rgba) {}
+
+    @Override
+    public synchronized void close() {
+        if (!closed) {
+            closed = true;
+            glyphs.clear();
+            if (upload != null) upload.close();
+            upload = null;
+        }
+    }
+
+    private record Raster(int width, int height, byte[] rgba) {
+    }
 }

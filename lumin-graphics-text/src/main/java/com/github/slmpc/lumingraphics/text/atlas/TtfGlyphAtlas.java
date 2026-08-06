@@ -1,4 +1,5 @@
 package com.github.slmpc.lumingraphics.text.atlas;
+
 import com.github.slmpc.lumingraphics.text.font.FontClosedException;
 import com.github.slmpc.lumingraphics.text.ttf.TtfGlyph;
 
@@ -6,7 +7,9 @@ import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BooleanSupplier;
 
-/** MIG-TEXT-TTF-ATLAS */
+/**
+ * MIG-TEXT-TTF-ATLAS
+ */
 public final class TtfGlyphAtlas implements AutoCloseable {
     private final int page;
     private final int width;
@@ -76,15 +79,29 @@ public final class TtfGlyphAtlas implements AutoCloseable {
                 (nextX + glyphWidth) / (float) width, (nextY + glyphHeight) / (float) height);
     }
 
-    public int page() { return page; }
-    public synchronized long revision() { ensureOpen(); return revision; }
-    public synchronized GlyphAtlasUpload upload() { ensureOpen(); return upload == null ? null : upload.value(); }
+    public int page() {
+        return page;
+    }
+
+    public synchronized long revision() {
+        ensureOpen();
+        return revision;
+    }
+
+    public synchronized GlyphAtlasUpload upload() {
+        ensureOpen();
+        return upload == null ? null : upload.value();
+    }
+
     public synchronized GlyphAtlasUploadLease retainUpload() {
         ensureOpen();
         if (upload == null) throw new IllegalStateException("Glyph atlas has no upload");
         return upload.retain();
     }
-    private void ensureOpen() { if (closed) throw new FontClosedException("Glyph atlas is closed"); }
+
+    private void ensureOpen() {
+        if (closed) throw new FontClosedException("Glyph atlas is closed");
+    }
 
     private void rollback(int x, int y, int glyphWidth, int glyphHeight) {
         for (int row = 0; row < glyphHeight; row++) {
@@ -93,7 +110,8 @@ public final class TtfGlyphAtlas implements AutoCloseable {
         }
     }
 
-    @Override public synchronized void close() {
+    @Override
+    public synchronized void close() {
         if (!closed) {
             closed = true;
             UploadSlot current = upload;
@@ -106,26 +124,45 @@ public final class TtfGlyphAtlas implements AutoCloseable {
         private final UploadSlot slot;
         private final AtomicBoolean closed = new AtomicBoolean();
 
-        private UploadLease(UploadSlot slot) { this.slot = slot; }
-        @Override public GlyphAtlasUpload upload() { return slot.value(); }
-        @Override public GlyphAtlasUploadLease retain() {
+        private UploadLease(UploadSlot slot) {
+            this.slot = slot;
+        }
+
+        @Override
+        public GlyphAtlasUpload upload() {
+            return slot.value();
+        }
+
+        @Override
+        public GlyphAtlasUploadLease retain() {
             if (closed.get()) throw new FontClosedException("Glyph atlas upload lease is closed");
             return slot.retain();
         }
-        @Override public void close() { if (closed.compareAndSet(false, true)) slot.release(); }
+
+        @Override
+        public void close() {
+            if (closed.compareAndSet(false, true)) slot.release();
+        }
     }
 
     private static final class UploadSlot {
         private final GlyphAtlasUpload upload;
         private int references = 1;
 
-        private UploadSlot(GlyphAtlasUpload upload) { this.upload = upload; }
-        synchronized GlyphAtlasUpload value() { return upload; }
+        private UploadSlot(GlyphAtlasUpload upload) {
+            this.upload = upload;
+        }
+
+        synchronized GlyphAtlasUpload value() {
+            return upload;
+        }
+
         synchronized UploadLease retain() {
             if (references == 0) throw new FontClosedException("Glyph atlas upload is retired");
             references++;
             return new UploadLease(this);
         }
+
         synchronized void release() {
             if (references == 0) return;
             references--;

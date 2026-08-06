@@ -13,10 +13,12 @@ import java.util.Objects;
 public abstract class FullscreenEffect implements AutoCloseable {
     private final String pipeline;
     private final LuminImmediateRenderer renderer;
+
     protected FullscreenEffect(RenderResources resources, int capacity, String pipeline) {
         this.pipeline = pipeline;
         renderer = new LuminImmediateRenderer(resources, capacity);
     }
+
     protected final void applyEffect(RenderExecution execution, Render2DTexture input, ByteBuffer uniforms) {
         Objects.requireNonNull(execution, "execution");
         FullscreenEffectRequest request = new FullscreenEffectRequest(pipeline, input, uniforms);
@@ -39,5 +41,9 @@ public abstract class FullscreenEffect implements AutoCloseable {
             }
         }
     }
-    @Override public final void close() { renderer.close(); }
+
+    @Override
+    public final void close() {
+        renderer.close();
+    }
 }

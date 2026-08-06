@@ -4,7 +4,9 @@ import com.github.slmpc.lumingraphics.core.exception.LuminValidationException;
 import com.github.slmpc.prismrhi.command.RhiCommandBuffer;
 import com.github.slmpc.prismrhi.device.RhiDevice;
 
-/** Immutable, injected state for one render submission. */
+/**
+ * Immutable, injected state for one render submission.
+ */
 public record RenderContext(
         RhiDevice device,
         RhiCommandBuffer commands,

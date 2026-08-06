@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.nio.ByteBuffer;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
@@ -67,12 +68,11 @@ class ShaderGlContextTest {
                     String log = glGetShaderInfoLog(shader);
                     receipt.append("SHADER ").append(relative).append(" status=")
                             .append(glGetShaderi(shader, GL_COMPILE_STATUS)).append(" log=").append(log).append('\n');
-                    assertTrue(glGetShaderi(shader, GL_COMPILE_STATUS) == GL_TRUE,
-                            () -> relative + " failed: " + log);
+                    assertEquals(GL_TRUE, glGetShaderi(shader, GL_COMPILE_STATUS), () -> relative + " failed: " + log);
                     shaders.put(relative, shader);
                 }
             }
-            assertTrue(shaders.size() == 37, "expected 37 compiled GL shaders");
+            assertEquals(37, shaders.size(), "expected 37 compiled GL shaders");
 
             for (var descriptor : LuminPipelineCatalog.entries()) {
                 int program = glCreateProgram();
@@ -82,8 +82,7 @@ class ShaderGlContextTest {
                 String log = glGetProgramInfoLog(program);
                 receipt.append("PROGRAM ").append(descriptor.id()).append(" status=")
                         .append(glGetProgrami(program, GL_LINK_STATUS)).append(" log=").append(log).append('\n');
-                assertTrue(glGetProgrami(program, GL_LINK_STATUS) == GL_TRUE,
-                        () -> descriptor.id() + " failed: " + log);
+                assertEquals(GL_TRUE, glGetProgrami(program, GL_LINK_STATUS), () -> descriptor.id() + " failed: " + log);
                 if (descriptor.id().equals("rectangle")) {
                     int frame = glGetUniformBlockIndex(program, "LuminFrame");
                     int draw = glGetUniformBlockIndex(program, "LuminDraw");
@@ -93,8 +92,7 @@ class ShaderGlContextTest {
                             .append(" LuminDraw.index=").append(draw).append('\n');
                     assertTrue(frame != GL_INVALID_INDEX && frameBinding == 0,
                             "LuminFrame must occupy binding 0");
-                    assertTrue(draw == GL_INVALID_INDEX,
-                            "per-draw ABI must use attributes, not a colliding LuminDraw UBO");
+                    assertEquals(GL_INVALID_INDEX, draw, "per-draw ABI must use attributes, not a colliding LuminDraw UBO");
                     verifyRectangleFrameDataAndDraw(program, receipt);
                 }
                 glDeleteProgram(program);
@@ -133,8 +131,8 @@ class ShaderGlContextTest {
 
             float[] vertices = {
                     -1, -1, 0, 0, 1, 0, 1,
-                     3, -1, 0, 0, 1, 0, 1,
-                    -1,  3, 0, 0, 1, 0, 1
+                    3, -1, 0, 0, 1, 0, 1,
+                    -1, 3, 0, 0, 1, 0, 1
             };
             glBindVertexArray(vertexArray);
             glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);

@@ -1,4 +1,5 @@
 package com.github.slmpc.lumingraphics.text;
+
 import com.github.slmpc.lumingraphics.text.font.FontClosedException;
 import com.github.slmpc.lumingraphics.text.ttf.TtfFontFile;
 import com.github.slmpc.lumingraphics.text.atlas.GlyphAtlasUpload;
@@ -18,6 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+
 import org.junit.jupiter.api.Test;
 
 class TextConsumerFixtureTest {

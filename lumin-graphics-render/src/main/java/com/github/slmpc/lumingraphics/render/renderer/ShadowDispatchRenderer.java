@@ -15,19 +15,24 @@ final class ShadowDispatchRenderer implements Renderer {
         segmented = new SegmentedShadowRenderer(resources, capacity);
     }
 
-    @Override public void beginFrame(RenderExecution execution) {
+    @Override
+    public void beginFrame(RenderExecution execution) {
         normal.beginFrame(execution);
-        try { segmented.beginFrame(execution); } catch (RuntimeException failure) {
+        try {
+            segmented.beginFrame(execution);
+        } catch (RuntimeException failure) {
             normal.endFrame();
             throw failure;
         }
     }
 
-    @Override public void render(Render2DCommand command, RenderExecution execution) {
+    @Override
+    public void render(Render2DCommand command, RenderExecution execution) {
         target(command).render(command, execution);
     }
 
-    @Override public void renderBatch(List<Render2DCommand> commands, RenderExecution execution) {
+    @Override
+    public void renderBatch(List<Render2DCommand> commands, RenderExecution execution) {
         if (commands == null || commands.isEmpty()) throw new IllegalArgumentException("render batch is empty");
         Renderer target = target(commands.get(0));
         if (commands.stream().anyMatch(command -> target(command) != target)) {
@@ -42,18 +47,30 @@ final class ShadowDispatchRenderer implements Renderer {
         throw new IllegalArgumentException("shadow renderer command kind mismatch");
     }
 
-    @Override public void endFrame() {
+    @Override
+    public void endFrame() {
         if (segmented.frameActive()) segmented.endFrame();
         if (normal.frameActive()) normal.endFrame();
     }
 
-    @Override public boolean frameActive() { return normal.frameActive() || segmented.frameActive(); }
+    @Override
+    public boolean frameActive() {
+        return normal.frameActive() || segmented.frameActive();
+    }
 
-    @Override public void close() {
+    @Override
+    public void close() {
         RuntimeException failure = null;
-        try { segmented.close(); } catch (RuntimeException closeFailure) { failure = closeFailure; }
-        try { normal.close(); } catch (RuntimeException closeFailure) {
-            if (failure == null) failure = closeFailure; else failure.addSuppressed(closeFailure);
+        try {
+            segmented.close();
+        } catch (RuntimeException closeFailure) {
+            failure = closeFailure;
+        }
+        try {
+            normal.close();
+        } catch (RuntimeException closeFailure) {
+            if (failure == null) failure = closeFailure;
+            else failure.addSuppressed(closeFailure);
         }
         if (failure != null) throw failure;
     }

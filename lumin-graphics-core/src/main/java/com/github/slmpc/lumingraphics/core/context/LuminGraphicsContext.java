@@ -29,9 +29,9 @@ public final class LuminGraphicsContext implements AutoCloseable {
     /**
      * 创建与一个调用方 Prism 设备关联的上下文。
      *
-     * @param device 已绑定有效上下文标识的 Prism 设备
-     * @param renderThread 用于约束 Prism 调用的线程门禁
-     * @param metricsSupplier 返回当前 framebuffer 指标的函数
+     * @param device               已绑定有效上下文标识的 Prism 设备
+     * @param renderThread         用于约束 Prism 调用的线程门禁
+     * @param metricsSupplier      返回当前 framebuffer 指标的函数
      * @param renderTargetSupplier 返回与当前指标匹配的颜色目标的函数
      */
     public LuminGraphicsContext(
@@ -55,6 +55,7 @@ public final class LuminGraphicsContext implements AutoCloseable {
 
     /**
      * 返回调用方设备；只能在渲染线程调用。
+     *
      * @return 调用方提供的 Prism 设备
      */
     public RhiDevice device() {
@@ -65,6 +66,7 @@ public final class LuminGraphicsContext implements AutoCloseable {
 
     /**
      * 返回当前 surface 指标；只能在渲染线程调用。
+     *
      * @return 当前 framebuffer 指标
      */
     public SurfaceMetrics metrics() {
@@ -79,6 +81,7 @@ public final class LuminGraphicsContext implements AutoCloseable {
 
     /**
      * 返回当前帧渲染目标，并验证其上下文标识和尺寸与 {@link #metrics()} 一致。
+     *
      * @return 当前帧颜色渲染目标
      */
     public RenderTarget renderTarget() {
@@ -98,6 +101,7 @@ public final class LuminGraphicsContext implements AutoCloseable {
 
     /**
      * 返回由本上下文关闭的资源注册表；只能在渲染线程调用。
+     *
      * @return 本上下文的资源注册表
      */
     public ResourceRegistry resources() {
@@ -106,7 +110,9 @@ public final class LuminGraphicsContext implements AutoCloseable {
         return resources;
     }
 
-    /** 验证当前线程是渲染线程。 */
+    /**
+     * 验证当前线程是渲染线程。
+     */
     public void requireRenderThread() {
         requireUsable();
         renderThread.requireRenderThread();
@@ -114,6 +120,7 @@ public final class LuminGraphicsContext implements AutoCloseable {
 
     /**
      * 立即在当前渲染线程执行动作。
+     *
      * @param action 要执行的动作
      */
     public void runOnRenderThread(Runnable action) {
@@ -123,6 +130,7 @@ public final class LuminGraphicsContext implements AutoCloseable {
 
     /**
      * 将动作投递至渲染线程；执行时会再次验证上下文未关闭。
+     *
      * @param action 要投递的动作
      */
     public void executeOnRenderThread(Runnable action) {
@@ -133,7 +141,9 @@ public final class LuminGraphicsContext implements AutoCloseable {
         });
     }
 
-    /** 使所有登记资源失效；调用方随后负责按自身策略重建它们。 */
+    /**
+     * 使所有登记资源失效；调用方随后负责按自身策略重建它们。
+     */
     public void invalidateResources() {
         requireUsable();
         renderThread.requireRenderThread();

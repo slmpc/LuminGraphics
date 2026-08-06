@@ -30,7 +30,8 @@ final class Render2DBatchPlanner {
             .comparingInt((BatchGroup group) -> group.key().pipeline().ordinal())
             .thenComparingLong(BatchGroup::firstSequence);
 
-    private Render2DBatchPlanner() { }
+    private Render2DBatchPlanner() {
+    }
 
     static List<Render2DCommand> plan(List<Render2DCommand> commands, Render2DBounds viewport,
                                       int spatialIndexThreshold) {
@@ -213,7 +214,9 @@ final class Render2DBatchPlanner {
         private final List<Render2DCommand> commands = new ArrayList<>();
         private Render2DBounds bounds;
 
-        private BatchGroup(BatchKey key) { this.key = key; }
+        private BatchGroup(BatchKey key) {
+            this.key = key;
+        }
 
         private void add(Render2DCommand command) {
             commands.add(command);
@@ -221,16 +224,26 @@ final class Render2DBatchPlanner {
             bounds = bounds == null ? commandBounds : include(bounds, commandBounds);
         }
 
-        private BatchKey key() { return key; }
+        private BatchKey key() {
+            return key;
+        }
 
-        private List<Render2DCommand> commands() { return commands; }
+        private List<Render2DCommand> commands() {
+            return commands;
+        }
 
-        private Render2DBounds bounds() { return bounds; }
+        private Render2DBounds bounds() {
+            return bounds;
+        }
 
-        private long firstSequence() { return commands.get(0).sequence(); }
+        private long firstSequence() {
+            return commands.get(0).sequence();
+        }
     }
 
-    /** primitive 前向星邻接表；组级图无需为每条边分配 List/Integer 对象。 */
+    /**
+     * primitive 前向星邻接表；组级图无需为每条边分配 List/Integer 对象。
+     */
     private static final class DependencyGraph {
         private final int[] firstEdges;
         private final int[] indegrees;
@@ -262,15 +275,25 @@ final class Render2DBatchPlanner {
             nextEdges = java.util.Arrays.copyOf(nextEdges, expanded);
         }
 
-        private int indegree(int group) { return indegrees[group]; }
+        private int indegree(int group) {
+            return indegrees[group];
+        }
 
-        private int release(int group) { return --indegrees[group]; }
+        private int release(int group) {
+            return --indegrees[group];
+        }
 
-        private int firstEdge(int group) { return firstEdges[group]; }
+        private int firstEdge(int group) {
+            return firstEdges[group];
+        }
 
-        private int nextEdge(int edge) { return nextEdges[edge]; }
+        private int nextEdge(int edge) {
+            return nextEdges[edge];
+        }
 
-        private int successor(int edge) { return successors[edge]; }
+        private int successor(int edge) {
+            return successors[edge];
+        }
     }
 
     private static Render2DBounds include(Render2DBounds first, Render2DBounds second) {

@@ -3,7 +3,9 @@ package com.github.slmpc.lumingraphics.render.immediate;
 import com.github.slmpc.lumingraphics.core.buffer.BufferWriter;
 import com.github.slmpc.lumingraphics.core.geometry.LuminColor;
 
-/** CPU tessellator for the shared position/color vertex ABI. */
+/**
+ * CPU tessellator for the shared position/color vertex ABI.
+ */
 public final class LuminTessellator {
     public static final int POSITION_COLOR_STRIDE = 16;
     private final BufferWriter writer;

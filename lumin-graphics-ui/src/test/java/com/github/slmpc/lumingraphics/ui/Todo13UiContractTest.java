@@ -469,16 +469,37 @@ final class Todo13UiContractTest {
         return UiRenderBatch.owned(scheduler,0,UiTheme.defaults(),new LuminUiRenderer(textRenderer,resources));
     }
 
-    private static final class NoopTextRenderer implements TextRenderer {
-        private final RuntimeException addFailure;
-        NoopTextRenderer(){this(null);}
-        NoopTextRenderer(RuntimeException addFailure){this.addFailure=addFailure;}
-        public TextMeasurement measure(String text,float scale,TtfFontLoader font){return new TextMeasurement(text.length()*scale,9*scale,1);}
-        public TextLayout add(String text,float x,float y,float scale,TtfFontLoader font){if(addFailure!=null)throw addFailure;return new TextLayout(0,0,0,0,0,0,List.of());}
-        public TextLayout add(String text,float x,float y,float scale,LuminColor color,TtfFontLoader font){return add(text,x,y,scale,font);}
-        public TextLayout addRotated(String text,float x,float y,float scale,LuminColor color,TtfFontLoader font,float originX,float originY,float degrees){return add(text,x,y,scale,font);}
-        public void draw(){} public void clear(){} public void close(){}
-    }
+    private record NoopTextRenderer(RuntimeException addFailure) implements TextRenderer {
+            NoopTextRenderer() {
+                this(null);
+            }
+
+        public TextMeasurement measure(String text, float scale, TtfFontLoader font) {
+            return new TextMeasurement(text.length() * scale, 9 * scale, 1);
+        }
+
+        public TextLayout add(String text, float x, float y, float scale, TtfFontLoader font) {
+            if (addFailure != null) throw addFailure;
+            return new TextLayout(0, 0, 0, 0, 0, 0, List.of());
+        }
+
+        public TextLayout add(String text, float x, float y, float scale, LuminColor color, TtfFontLoader font) {
+            return add(text, x, y, scale, font);
+        }
+
+        public TextLayout addRotated(String text, float x, float y, float scale, LuminColor color, TtfFontLoader font, float originX, float originY, float degrees) {
+            return add(text, x, y, scale, font);
+        }
+
+        public void draw() {
+        }
+
+        public void clear() {
+        }
+
+        public void close() {
+        }
+        }
 
     private static final class TextFixture implements AutoCloseable {
         private final AtomicInteger sequence=new AtomicInteger();

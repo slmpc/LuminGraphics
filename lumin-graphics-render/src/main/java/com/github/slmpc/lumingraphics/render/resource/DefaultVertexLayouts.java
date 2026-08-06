@@ -5,9 +5,12 @@ import com.github.slmpc.lumingraphics.render.pipeline.LuminPipelineCatalog;
 import com.github.slmpc.prismrhi.format.RhiFormat;
 import com.github.slmpc.prismrhi.pipeline.RhiGraphicsPipelineCreateInfo;
 
-/** 将 Lumin catalog 顶点 ABI 映射为 Prism 管线声明。 */
+/**
+ * 将 Lumin catalog 顶点 ABI 映射为 Prism 管线声明。
+ */
 final class DefaultVertexLayouts {
-    private DefaultVertexLayouts() { }
+    private DefaultVertexLayouts() {
+    }
 
     static void apply(RhiGraphicsPipelineCreateInfo.Builder builder,
                       LuminPipelineCatalog.VertexLayout layout) {

@@ -1,15 +1,20 @@
 package com.github.slmpc.lumingraphics.render.scheduler;
 
 import com.github.slmpc.lumingraphics.core.geometry.LuminColor;
+
 import java.util.List;
 
 public sealed interface Render2DCommand permits Render2DCommand.Shadow, Render2DCommand.SegmentedShadow,
         Render2DCommand.RoundRect, Render2DCommand.RoundRectOutline, Render2DCommand.Rect,
         Render2DCommand.Triangle, Render2DCommand.Texture, Render2DCommand.Glyphs {
     int layer();
+
     long sequence();
+
     Render2DBounds bounds();
+
     Render2DScissor scissor();
+
     Render2DCommandKind kind();
 
     record Shadow(int layer, long sequence, Render2DBounds shapeBounds, Render2DScissor scissor,
@@ -21,12 +26,21 @@ public sealed interface Render2DCommand permits Render2DCommand.Shadow, Render2D
             nonNegative("blur radius", blurRadius);
             shapeBounds.expand(blurRadius);
         }
+
         public Shadow(int layer, long sequence, Render2DBounds bounds, Render2DScissor scissor,
                       float radius, float blurRadius, LuminColor color) {
             this(layer, sequence, bounds, scissor, radius, radius, radius, radius, blurRadius, color);
         }
-        @Override public Render2DBounds bounds() { return shapeBounds.expand(blurRadius); }
-        @Override public Render2DCommandKind kind() { return Render2DCommandKind.SHADOW; }
+
+        @Override
+        public Render2DBounds bounds() {
+            return shapeBounds.expand(blurRadius);
+        }
+
+        @Override
+        public Render2DCommandKind kind() {
+            return Render2DCommandKind.SHADOW;
+        }
     }
 
     record SegmentedShadow(int layer, long sequence, Render2DBounds shapeBounds, Render2DScissor scissor,
@@ -55,10 +69,26 @@ public sealed interface Render2DCommand permits Render2DCommand.Shadow, Render2D
             }
             shapeBounds.expand(blurRadius);
         }
-        @Override public float[] segmentRects() { return segmentRects.clone(); }
-        @Override public float[] segmentRadii() { return segmentRadii.clone(); }
-        @Override public Render2DBounds bounds() { return shapeBounds.expand(blurRadius); }
-        @Override public Render2DCommandKind kind() { return Render2DCommandKind.SHADOW; }
+
+        @Override
+        public float[] segmentRects() {
+            return segmentRects.clone();
+        }
+
+        @Override
+        public float[] segmentRadii() {
+            return segmentRadii.clone();
+        }
+
+        @Override
+        public Render2DBounds bounds() {
+            return shapeBounds.expand(blurRadius);
+        }
+
+        @Override
+        public Render2DCommandKind kind() {
+            return Render2DCommandKind.SHADOW;
+        }
     }
 
     record RoundRect(int layer, long sequence, Render2DBounds bounds, Render2DScissor scissor,
@@ -69,12 +99,17 @@ public sealed interface Render2DCommand permits Render2DCommand.Shadow, Render2D
             require(bounds, topLeft, bottomLeft, bottomRight, topRight);
             radii(radiusTopLeft, radiusTopRight, radiusBottomRight, radiusBottomLeft);
         }
+
         public RoundRect(int layer, long sequence, Render2DBounds bounds, Render2DScissor scissor,
                          float radius, LuminColor color) {
             this(layer, sequence, bounds, scissor, radius, radius, radius, radius,
                     color, color, color, color);
         }
-        @Override public Render2DCommandKind kind() { return Render2DCommandKind.ROUND_RECT; }
+
+        @Override
+        public Render2DCommandKind kind() {
+            return Render2DCommandKind.ROUND_RECT;
+        }
     }
 
     record RoundRectOutline(int layer, long sequence, Render2DBounds shapeBounds, Render2DScissor scissor,
@@ -86,23 +121,39 @@ public sealed interface Render2DCommand permits Render2DCommand.Shadow, Render2D
             nonNegative("outline width", width);
             shapeBounds.expand(width * 0.5f);
         }
+
         public RoundRectOutline(int layer, long sequence, Render2DBounds bounds, Render2DScissor scissor,
                                 float radius, float width, LuminColor color) {
             this(layer, sequence, bounds, scissor, radius, radius, radius, radius, width, color);
         }
-        @Override public Render2DBounds bounds() { return shapeBounds.expand(width * 0.5f); }
-        @Override public Render2DCommandKind kind() { return Render2DCommandKind.ROUND_RECT_OUTLINE; }
+
+        @Override
+        public Render2DBounds bounds() {
+            return shapeBounds.expand(width * 0.5f);
+        }
+
+        @Override
+        public Render2DCommandKind kind() {
+            return Render2DCommandKind.ROUND_RECT_OUTLINE;
+        }
     }
 
     record Rect(int layer, long sequence, Render2DBounds bounds, Render2DScissor scissor,
                 LuminColor topLeft, LuminColor bottomLeft, LuminColor bottomRight,
                 LuminColor topRight) implements Render2DCommand {
-        public Rect { require(bounds, topLeft, bottomLeft, bottomRight, topRight); }
+        public Rect {
+            require(bounds, topLeft, bottomLeft, bottomRight, topRight);
+        }
+
         public Rect(int layer, long sequence, Render2DBounds bounds, Render2DScissor scissor,
                     LuminColor color) {
             this(layer, sequence, bounds, scissor, color, color, color, color);
         }
-        @Override public Render2DCommandKind kind() { return Render2DCommandKind.RECT; }
+
+        @Override
+        public Render2DCommandKind kind() {
+            return Render2DCommandKind.RECT;
+        }
     }
 
     record Triangle(int layer, long sequence, Render2DBounds bounds, Render2DScissor scissor,
@@ -115,7 +166,11 @@ public sealed interface Render2DCommand permits Render2DCommand.Shadow, Render2D
             nonNegative("triangle size", size);
             unit("triangle progress", progress);
         }
-        @Override public Render2DCommandKind kind() { return Render2DCommandKind.TRIANGLE; }
+
+        @Override
+        public Render2DCommandKind kind() {
+            return Render2DCommandKind.TRIANGLE;
+        }
     }
 
     record Texture(int layer, long sequence, Render2DBounds quadBounds, Render2DScissor scissor,
@@ -136,15 +191,22 @@ public sealed interface Render2DCommand permits Render2DCommand.Shadow, Render2D
             }
             if (rotationDegrees != 0) rotatedBounds(quadBounds, originX, originY, rotationDegrees);
         }
+
         public Texture(int layer, long sequence, Render2DBounds bounds, Render2DScissor scissor,
                        Render2DTexture texture, LuminColor color) {
             this(layer, sequence, bounds, scissor, texture, 0, 0, 0, 0,
                     0, 0, 1, 1, color, 0, 0, 0);
         }
-        @Override public Render2DBounds bounds() {
+
+        @Override
+        public Render2DBounds bounds() {
             return rotationDegrees == 0 ? quadBounds : rotatedBounds(quadBounds, originX, originY, rotationDegrees);
         }
-        @Override public Render2DCommandKind kind() { return Render2DCommandKind.TEXTURE; }
+
+        @Override
+        public Render2DCommandKind kind() {
+            return Render2DCommandKind.TEXTURE;
+        }
     }
 
     record Glyphs(int layer, long sequence, Render2DBounds quadBounds, Render2DScissor scissor,
@@ -161,14 +223,21 @@ public sealed interface Render2DCommand permits Render2DCommand.Shadow, Render2D
             glyphs = List.copyOf(glyphs);
             if (rotationDegrees != 0) rotatedBounds(quadBounds, originX, originY, rotationDegrees);
         }
+
         public Glyphs(int layer, long sequence, Render2DBounds bounds, Render2DScissor scissor,
                       Render2DTexture texture, List<GlyphQuad> glyphs) {
             this(layer, sequence, bounds, scissor, texture, glyphs, 0, 0, 0);
         }
-        @Override public Render2DBounds bounds() {
+
+        @Override
+        public Render2DBounds bounds() {
             return rotationDegrees == 0 ? quadBounds : rotatedBounds(quadBounds, originX, originY, rotationDegrees);
         }
-        @Override public Render2DCommandKind kind() { return Render2DCommandKind.GLYPH; }
+
+        @Override
+        public Render2DCommandKind kind() {
+            return Render2DCommandKind.GLYPH;
+        }
     }
 
     private static void require(Render2DBounds bounds, LuminColor... colors) {
@@ -186,7 +255,10 @@ public sealed interface Render2DCommand permits Render2DCommand.Shadow, Render2D
     }
 
     private static void uv(float u0, float v0, float u1, float v1) {
-        unit("u0", u0); unit("v0", v0); unit("u1", u1); unit("v1", v1);
+        unit("u0", u0);
+        unit("v0", v0);
+        unit("u1", u1);
+        unit("v1", v1);
     }
 
     private static void unit(String name, float value) {
@@ -206,7 +278,7 @@ public sealed interface Render2DCommand permits Render2DCommand.Shadow, Render2D
     }
 
     private static Render2DBounds rotatedBounds(Render2DBounds bounds, float originX, float originY,
-                                                 float rotationDegrees) {
+                                                float rotationDegrees) {
         double radians = Math.toRadians(rotationDegrees);
         float cos = (float) Math.cos(radians);
         float sin = (float) Math.sin(radians);
@@ -221,8 +293,10 @@ public sealed interface Render2DCommand permits Render2DCommand.Shadow, Render2D
             float dy = ys[i] - originY;
             float x = originX + dx * cos - dy * sin;
             float y = originY + dx * sin + dy * cos;
-            minX = Math.min(minX, x); minY = Math.min(minY, y);
-            maxX = Math.max(maxX, x); maxY = Math.max(maxY, y);
+            minX = Math.min(minX, x);
+            minY = Math.min(minY, y);
+            maxX = Math.max(maxX, x);
+            maxY = Math.max(maxY, y);
         }
         return new Render2DBounds(minX, minY, maxX - minX, maxY - minY);
     }

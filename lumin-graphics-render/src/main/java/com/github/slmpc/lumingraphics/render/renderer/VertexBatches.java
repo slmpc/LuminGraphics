@@ -11,7 +11,9 @@ import java.util.List;
 
 final class VertexBatches {
     private static final int[] CORNERS = {0, 1, 2, 0, 2, 3};
-    private VertexBatches() { }
+
+    private VertexBatches() {
+    }
 
     static VertexBatch positionColors(Render2DBounds bounds, LuminColor topLeft, LuminColor bottomLeft,
                                       LuminColor bottomRight, LuminColor topRight) {
@@ -132,7 +134,7 @@ final class VertexBatches {
     }
 
     private static float[] transformedCorners(Render2DBounds bounds, float originX, float originY,
-                                               float rotationDegrees) {
+                                              float rotationDegrees) {
         float[] result = {bounds.x(), bounds.y(), bounds.x(), bounds.bottom(),
                 bounds.right(), bounds.bottom(), bounds.right(), bounds.y()};
         if (rotationDegrees == 0) return result;
@@ -171,5 +173,8 @@ final class VertexBatches {
         for (int corner : CORNERS) writer.write(x[corner], y[corner], corner);
     }
 
-    @FunctionalInterface private interface CornerWriter { void write(float x, float y, int corner); }
+    @FunctionalInterface
+    private interface CornerWriter {
+        void write(float x, float y, int corner);
+    }
 }

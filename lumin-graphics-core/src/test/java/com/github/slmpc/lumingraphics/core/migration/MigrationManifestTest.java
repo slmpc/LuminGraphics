@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+
 import org.junit.jupiter.api.Test;
 
 class MigrationManifestTest {
@@ -41,9 +42,9 @@ class MigrationManifestTest {
                 .count();
         assertEquals(3, mcRoutes, "Exactly three Minecraft text adapters must route to LuminGraphics-MC");
         assertEquals(Set.of(
-                "graphics/text/minecraft/EpsilonFontGlyph.java",
-                "graphics/text/minecraft/EpsilonFontMetrics.java",
-                "graphics/text/minecraft/EpsilonTextRenderable.java"),
+                        "graphics/text/minecraft/EpsilonFontGlyph.java",
+                        "graphics/text/minecraft/EpsilonFontMetrics.java",
+                        "graphics/text/minecraft/EpsilonTextRenderable.java"),
                 rows.stream()
                         .filter(row -> row.get("disposition").equals("move-to-MC"))
                         .map(row -> row.get("source"))
@@ -100,9 +101,9 @@ class MigrationManifestTest {
         }
         if (source.startsWith("graphics/")) {
             return source.startsWith("graphics/buffer/")
-                            || source.equals("graphics/LuminRenderSystem.java")
-                            || source.equals("graphics/LuminTexture.java")
-                            || source.equals("graphics/LuminVertexFormats.java")
+                    || source.equals("graphics/LuminRenderSystem.java")
+                    || source.equals("graphics/LuminTexture.java")
+                    || source.equals("graphics/LuminVertexFormats.java")
                     ? "LuminGraphics/lumin-graphics-core"
                     : "LuminGraphics/lumin-graphics-render";
         }
@@ -112,7 +113,7 @@ class MigrationManifestTest {
     private static Set<String> actualSources() throws IOException {
         Path javaRoot = epsilonRoot().resolve("common/src/main/java/com/github/epsilon");
         try (var graphics = Files.walk(javaRoot.resolve("graphics"));
-                var gui = Files.walk(javaRoot.resolve("gui/lib"))) {
+             var gui = Files.walk(javaRoot.resolve("gui/lib"))) {
             Set<String> sources = java.util.stream.Stream.concat(graphics, gui)
                     .filter(path -> Files.isRegularFile(path) && path.toString().endsWith(".java"))
                     .map(path -> javaRoot.relativize(path).toString().replace('\\', '/'))

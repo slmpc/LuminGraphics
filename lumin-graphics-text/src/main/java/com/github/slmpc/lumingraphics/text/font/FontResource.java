@@ -13,10 +13,14 @@ import java.util.Objects;
  * TTF/OTF 文件；{@link #classpath(String)} 仅查询调用方自己的 classpath 资源。</p>
  */
 public interface FontResource {
-    /** 读取完整字体字节；调用方负责确保来源在 loader 生命周期内可读。 */
+    /**
+     * 读取完整字体字节；调用方负责确保来源在 loader 生命周期内可读。
+     */
     byte[] read() throws IOException;
 
-    /** 返回用于诊断的来源描述，不能作为稳定的资源标识。 */
+    /**
+     * 返回用于诊断的来源描述，不能作为稳定的资源标识。
+     */
     String description();
 
     /**
@@ -28,8 +32,13 @@ public interface FontResource {
     static FontResource path(Path path) {
         Path normalized = Objects.requireNonNull(path, "path").toAbsolutePath().normalize();
         return new FontResource() {
-            public byte[] read() throws IOException { return Files.readAllBytes(normalized); }
-            public String description() { return normalized.toString(); }
+            public byte[] read() throws IOException {
+                return Files.readAllBytes(normalized);
+            }
+
+            public String description() {
+                return normalized.toString();
+            }
         };
     }
 
@@ -51,7 +60,10 @@ public interface FontResource {
                     return input.readAllBytes();
                 }
             }
-            public String description() { return "classpath:/" + resourceName; }
+
+            public String description() {
+                return "classpath:/" + resourceName;
+            }
         };
     }
 }

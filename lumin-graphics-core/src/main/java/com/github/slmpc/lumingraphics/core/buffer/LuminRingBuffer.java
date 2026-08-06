@@ -10,7 +10,9 @@ import com.github.slmpc.prismrhi.resource.RhiMemoryUsage;
 
 import java.nio.ByteBuffer;
 
-/** A fixed-capacity frame ring that refuses to overwrite in-flight GPU data. */
+/**
+ * A fixed-capacity frame ring that refuses to overwrite in-flight GPU data.
+ */
 public final class LuminRingBuffer implements AutoCloseable {
     private final RhiBuffer[] slots;
     private final long[] lastFrames;
@@ -122,12 +124,16 @@ public final class LuminRingBuffer implements AutoCloseable {
         closed = true;
         RuntimeException failure = null;
         for (int i = slots.length - 1; i >= 0; i--) {
-            try { slots[i].close(); } catch (RuntimeException closeFailure) {
-                if (failure == null) failure = closeFailure; else failure.addSuppressed(closeFailure);
+            try {
+                slots[i].close();
+            } catch (RuntimeException closeFailure) {
+                if (failure == null) failure = closeFailure;
+                else failure.addSuppressed(closeFailure);
             }
         }
         if (failure != null) throw failure;
     }
 
-    public record Allocation(RhiBuffer buffer, int slot, int offset, int length) { }
+    public record Allocation(RhiBuffer buffer, int slot, int offset, int length) {
+    }
 }

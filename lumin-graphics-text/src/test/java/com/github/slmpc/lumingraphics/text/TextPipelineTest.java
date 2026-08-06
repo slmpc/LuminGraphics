@@ -1,4 +1,5 @@
 package com.github.slmpc.lumingraphics.text;
+
 import com.github.slmpc.lumingraphics.text.font.FontClosedException;
 import com.github.slmpc.lumingraphics.text.font.FontException;
 import com.github.slmpc.lumingraphics.text.font.FontMalformedException;
@@ -47,6 +48,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicBoolean;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.io.TempDir;
@@ -75,7 +77,7 @@ class TextPipelineTest {
     @Test
     void malformedAndMissingGlyphsHaveTypedErrors(@TempDir Path tempDir) throws Exception {
         Path malformed = tempDir.resolve("malformed.ttf");
-        Files.write(malformed, new byte[] {1, 2, 3, 4});
+        Files.write(malformed, new byte[]{1, 2, 3, 4});
         assertThrows(FontMalformedException.class,
                 () -> TtfFontFile.open(FontResource.path(malformed), 48, 4));
         try (TtfFontFile font = TtfFontFile.open(FONT, 48, 4)) {
@@ -172,7 +174,7 @@ class TextPipelineTest {
             assertEquals(text.length(), layout.glyphCount());
             assertTrue(layout.batches().size() > 1, "fixture must overflow the first atlas page");
             assertEquals(layout.batches().size(), layout.batches().stream()
-                    .map(TextRenderBatch::upload).distinct().count(),
+                            .map(TextRenderBatch::upload).distinct().count(),
                     "each atlas page must retain its own upload batch");
             assertEquals(text.length(), layout.batches().stream().mapToInt(TextRenderBatch::glyphCount).sum());
             closeBatches(layout);
@@ -230,7 +232,8 @@ class TextPipelineTest {
             if (throwOnClose.get()) throw new IllegalStateException("first cleanup failed");
         }));
         TtfGlyphAtlas second = new TtfGlyphAtlas(1, 8, 8,
-                pixels -> new GlyphAtlasUpload("second", () -> {}));
+                pixels -> new GlyphAtlasUpload("second", () -> {
+                }));
         first.append(tinyGlyph('A'));
         second.append(tinyGlyph('B'));
         GlyphAtlasUpload firstUpload = first.upload();
@@ -256,9 +259,9 @@ class TextPipelineTest {
             assertSame(queuedUpload, second.upload());
             loader.requireGlyph('B');
             assertFalse(queuedUpload.isClosed(), "atlas mutation must not retire a leased upload");
-            ((AutoCloseable) (Object) first).close();
+            ((AutoCloseable) first).close();
             assertFalse(queuedUpload.isClosed(), "one remaining batch lease must keep the upload alive");
-            ((AutoCloseable) (Object) second).close();
+            ((AutoCloseable) second).close();
             assertTrue(queuedUpload.isClosed(), "the last batch lease must retire the old upload exactly once");
         }
     }
@@ -267,7 +270,9 @@ class TextPipelineTest {
     void rendererReleasesPendingBatchWhenDrawFailsAndWhenCleared() {
         CountingUploader uploader = new CountingUploader();
         try (TtfFontLoader loader = new TtfFontLoader(FONT, 48, 4, 96, 96, 4, uploader, Runnable::run);
-             TtfTextRenderer renderer = new TtfTextRenderer(ignored -> { throw new IllegalStateException("sink failed"); })) {
+             TtfTextRenderer renderer = new TtfTextRenderer(ignored -> {
+                 throw new IllegalStateException("sink failed");
+             })) {
             TextRenderBatch failed = renderer.add("A", 0, 0, 1, loader).batches().get(0);
             GlyphAtlasUpload failedUpload = failed.upload();
             loader.requireGlyph('B');
@@ -416,7 +421,9 @@ class TextPipelineTest {
 
     @Test
     void uploadFailureAndAtlasExhaustionAreTypedAndLeakFree() {
-        GlyphAtlasUploader failing = pixels -> { throw new IllegalStateException("device lost"); };
+        GlyphAtlasUploader failing = pixels -> {
+            throw new IllegalStateException("device lost");
+        };
         try (TtfFontLoader loader = new TtfFontLoader(FONT, 48, 4, 64, 64, 1, failing, Runnable::run)) {
             assertThrows(GlyphUploadException.class, () -> loader.requireGlyph('A'));
         }
@@ -467,7 +474,7 @@ class TextPipelineTest {
     }
 
     private static TtfGlyph tinyGlyph(int codepoint) {
-        return new TtfGlyph(codepoint, 1, 1, 0, 0, 1, new byte[] { 1 });
+        return new TtfGlyph(codepoint, 1, 1, 0, 0, 1, new byte[]{1});
     }
 
     private static Map<TtfGlyphAtlas, List<GlyphPlacement>> closeAtlasesBeforeSecondEntry(
@@ -476,14 +483,26 @@ class TextPipelineTest {
                 Map.entry(first, List.of(new GlyphPlacement('A', 0, 0, 1, 1, new GlyphUv(0, 0, 1, 1)))),
                 Map.entry(second, List.of(new GlyphPlacement('B', 1, 0, 2, 1, new GlyphUv(0, 0, 1, 1)))));
         return new AbstractMap<>() {
-            @Override public Set<Entry<TtfGlyphAtlas, List<GlyphPlacement>>> entrySet() {
+            @Override
+            public Set<Entry<TtfGlyphAtlas, List<GlyphPlacement>>> entrySet() {
                 return new AbstractSet<>() {
-                    @Override public int size() { return entries.size(); }
-                    @Override public Iterator<Entry<TtfGlyphAtlas, List<GlyphPlacement>>> iterator() {
+                    @Override
+                    public int size() {
+                        return entries.size();
+                    }
+
+                    @Override
+                    public Iterator<Entry<TtfGlyphAtlas, List<GlyphPlacement>>> iterator() {
                         return new Iterator<>() {
                             private int index;
-                            @Override public boolean hasNext() { return index < entries.size(); }
-                            @Override public Entry<TtfGlyphAtlas, List<GlyphPlacement>> next() {
+
+                            @Override
+                            public boolean hasNext() {
+                                return index < entries.size();
+                            }
+
+                            @Override
+                            public Entry<TtfGlyphAtlas, List<GlyphPlacement>> next() {
                                 if (index == 1) {
                                     throwOnClose.set(true);
                                     first.close();
@@ -498,7 +517,9 @@ class TextPipelineTest {
         };
     }
 
-    private static void closeBatches(TextLayout layout) { layout.batches().forEach(TextRenderBatch::close); }
+    private static void closeBatches(TextLayout layout) {
+        layout.batches().forEach(TextRenderBatch::close);
+    }
 
     private static final class CountingUploader implements GlyphAtlasUploader {
         final AtomicInteger uploads = new AtomicInteger();
@@ -521,7 +542,8 @@ class TextPipelineTest {
         final CountDownLatch interrupted = new CountDownLatch(1);
         final CountDownLatch release = new CountDownLatch(1);
 
-        @Override public GlyphAtlasUpload upload(AtlasPixels pixels) {
+        @Override
+        public GlyphAtlasUpload upload(AtlasPixels pixels) {
             entered.countDown();
             try {
                 release.await();
@@ -540,7 +562,8 @@ class TextPipelineTest {
         final AtomicInteger live = new AtomicInteger();
         volatile boolean throwOnClose;
 
-        @Override public GlyphAtlasUpload upload(AtlasPixels pixels) {
+        @Override
+        public GlyphAtlasUpload upload(AtlasPixels pixels) {
             int sequence = uploads.incrementAndGet();
             live.incrementAndGet();
             return new GlyphAtlasUpload("throwing-texture-" + sequence, () -> {
@@ -555,7 +578,8 @@ class TextPipelineTest {
         final CountDownLatch entered = new CountDownLatch(1);
         final CountDownLatch release = new CountDownLatch(1);
 
-        @Override public GlyphAtlasUpload upload(AtlasPixels pixels) {
+        @Override
+        public GlyphAtlasUpload upload(AtlasPixels pixels) {
             entered.countDown();
             awaitUninterruptibly(release);
             throw new IllegalStateException("expected upload failure");

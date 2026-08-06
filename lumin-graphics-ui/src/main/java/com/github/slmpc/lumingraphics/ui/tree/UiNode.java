@@ -1,4 +1,5 @@
 package com.github.slmpc.lumingraphics.ui.tree;
+
 import com.github.slmpc.lumingraphics.ui.control.AssistChip;
 import com.github.slmpc.lumingraphics.ui.control.Button;
 import com.github.slmpc.lumingraphics.ui.control.FilledField;
@@ -27,5 +28,6 @@ import com.github.slmpc.lumingraphics.ui.node.primitive.Texture;
 import com.github.slmpc.lumingraphics.ui.node.primitive.Triangle;
 import com.github.slmpc.lumingraphics.ui.viewport.Viewport;
 
-public interface UiNode { }
+public interface UiNode {
+}
 

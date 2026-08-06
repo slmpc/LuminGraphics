@@ -203,7 +203,9 @@ class Todo11BehaviorTest {
     void threeDimensionalFlushAndClearDropsCommandsAfterActionFailure() {
         FakeRhi fake = new FakeRhi();
         Render3DScheduler scheduler = new Render3DScheduler();
-        scheduler.add(0, execution -> { throw new IllegalStateException("3D backend failed"); });
+        scheduler.add(0, execution -> {
+            throw new IllegalStateException("3D backend failed");
+        });
         assertThrows(IllegalStateException.class,
                 () -> scheduler.flushAndClear(fake.execution(1, 0, 20, 20)));
         assertTrue(scheduler.isEmpty());
